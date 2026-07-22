@@ -8,6 +8,20 @@
 | FrankenPHP **classic** | Longer-lived PHP inside Caddy | Most request state; process APIs still dangerous |
 | FrankenPHP **worker** | App boots once; many requests | Framework reset + what you implement; statics/globals/`$_ENV` persist |
 
+## FPM compatibility (important)
+
+**Fixing findings from these rules does not make your application incompatible with PHP-FPM.**
+
+The recommended replacements (exceptions/`Response` instead of `exit`, request-scoped services / `ResetInterface` instead of mutable statics, framework sessions instead of sticky native session globals, bounded timeouts, queues instead of `fastcgi_finish_request()`, …) are ordinary, portable PHP/framework patterns. They run correctly under:
+
+- PHP-FPM (unchanged deploy target),
+- FrankenPHP classic,
+- FrankenPHP worker.
+
+What changes is **solidity**, not the runtime contract: FPM already hides many of these bugs because the process dies often; worker mode surfaces them. Applying the fixes early is safe on FPM and required for a reliable worker.
+
+Caveat: you may **stop using FPM-only APIs** (notably `fastcgi_finish_request()`). That removes an FPM convenience; it does not break FPM. Prefer framework response + async/queue work so the same code path works everywhere.
+
 ## Recommended sequence
 
 1. **Deploy classic** with `FRANKENPHP_MODE=classic` (or `Caddyfile.dev` without `worker`).

@@ -9,6 +9,12 @@
 2. Read [CHANGELOG.md](CHANGELOG.md) for the target version.
 3. Re-run PHPStan with your chosen rulesets and the package demos if you maintain local forks of fixtures.
 
+## Upgrading to 1.0.1
+
+Documentation-only release. No rule behaviour changes and **no consumer action required**.
+
+Clarifies that remediations remain valid under PHP-FPM (portable hygiene for FrankenPHP classic/worker). See [MIGRATION.md — FPM compatibility](MIGRATION.md#fpm-compatibility-important).
+
 ## Adopting 1.0.0 (first stable release)
 
 There is no prior public `0.x` line. Treat this as a greenfield install.
@@ -32,6 +38,7 @@ There is no prior public `0.x` line. Treat this as a greenfield install.
 
 - Worker rules flag persistent process state (`static`, globals, `$_ENV` / `$_SESSION`, …).
 - Request superglobals (`$_GET`, `$_POST`, …) are **not** flagged unless you include `ruleset-worker-strict.neon` or set `frankenphp.flagRequestSuperglobals: true`.
+- Suggested fixes stay **FPM-compatible** (see [MIGRATION.md](MIGRATION.md#fpm-compatibility-important)).
 
 ## PHPStan major upgrades
 

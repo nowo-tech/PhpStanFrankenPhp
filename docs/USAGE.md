@@ -38,6 +38,8 @@ make demo-all
 2. Run `ruleset-worker` on a dedicated job or after classic is green.
 3. Run `ruleset-hardening` before enabling worker in production.
 
+Remediations remain valid under PHP-FPM; see [MIGRATION.md — FPM compatibility](MIGRATION.md#fpm-compatibility-important).
+
 ## Related docs
 
 - [RULES.md](RULES.md) — full catalog

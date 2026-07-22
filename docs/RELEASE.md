@@ -1,6 +1,6 @@
 # Release
 
-Current stable: **v1.0.0** (2026-07-22).
+Current stable: **v1.0.1** (2026-07-22).
 
 ## Checklist
 

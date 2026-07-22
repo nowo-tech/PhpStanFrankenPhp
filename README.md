@@ -34,6 +34,8 @@ PHPStan rules that help you migrate from **PHP-FPM** to **FrankenPHP classic**, 
 
 FrankenPHP classic already changes process lifetime compared to FPM (`exit`/`die`, FastCGI APIs, unbounded I/O). Worker mode keeps the app in memory: statics, globals, and `$_ENV` mutations survive across requests. This extension surfaces those sites in CI so you can fix them in order.
 
+**Fixes stay FPM-compatible.** The suggested remediations are portable patterns (no FrankenPHP-only APIs). They make the codebase more solid on FPM and safe for worker mode. Details: [docs/MIGRATION.md — FPM compatibility](docs/MIGRATION.md#fpm-compatibility-important).
+
 ## Levels (application order)
 
 | Order | Ruleset | When |

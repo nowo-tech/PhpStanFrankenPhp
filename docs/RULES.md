@@ -20,6 +20,8 @@ Apply rulesets in this order. Do not enable worker rules until classic findings 
 | 2b (optional) | `ruleset-worker-strict.neon` | Also flag $_GET/$_POST/… (framework-only hygiene) |
 | 3 | `ruleset-hardening.neon` | Bound resources and remove thread-hostile APIs |
 
+**FPM remains supported.** Remediations are portable application hygiene: they harden the app for FrankenPHP worker (and classic) without requiring FrankenPHP-specific APIs, and they continue to work under PHP-FPM. See [MIGRATION.md — FPM compatibility](MIGRATION.md#fpm-compatibility-important).
+
 ```neon
 # phpstan.neon (consumer project) — recommended phased includes
 includes:
