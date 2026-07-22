@@ -1,0 +1,10 @@
+includes:
+    - ../extension.neon
+    - ../ruleset-classic.neon
+
+parameters:
+    level: 0
+    paths:
+        - classic
+    excludePaths:
+        - classic/good

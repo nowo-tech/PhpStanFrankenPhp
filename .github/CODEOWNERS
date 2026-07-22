@@ -1,0 +1,9 @@
+# CODEOWNERS for PhpStanFrankenPhp
+* @HecFranco
+
+/.github/ @HecFranco
+/src/ @HecFranco
+/tests/ @HecFranco
+/rules/ @HecFranco
+/demo/ @HecFranco
+/docs/ @HecFranco

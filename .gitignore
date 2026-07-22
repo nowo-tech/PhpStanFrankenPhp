@@ -1,0 +1,47 @@
+# Dependencies
+/vendor/
+
+# Composer
+composer.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# PHPUnit
+.phpunit.result.cache
+.phpunit.cache/
+coverage/
+coverage.xml
+/coverage-php.txt
+/coverage-output.txt
+
+# PHP-CS-Fixer
+.php-cs-fixer.cache
+
+# Build
+/build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Archives / compressed
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+# Cursor local sandbox (machine-specific; REQ-IDE-005)
+.cursor/sandbox.json
+
+

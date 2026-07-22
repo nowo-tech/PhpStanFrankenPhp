@@ -1,0 +1,8 @@
+# Optional strict worker hygiene: also flag $_GET/$_POST/$_COOKIE/$_FILES/$_REQUEST/$_SERVER.
+# Use after classic + default worker are clean, if you want framework-only request access.
+includes:
+    - ruleset-worker.neon
+
+parameters:
+    frankenphp:
+        flagRequestSuperglobals: true

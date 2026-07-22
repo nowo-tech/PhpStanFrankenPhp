@@ -1,0 +1,4 @@
+# Level 1 — FPM → FrankenPHP classic
+# Apply first. Detects process-killing APIs, FPM-only calls, and unbounded I/O.
+includes:
+    - rules/classic.neon

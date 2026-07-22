@@ -1,0 +1,41 @@
+name: phpstan-frankenphp-demo-symfony-8
+
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: phpstan-frankenphp-symfony8-php
+    working_dir: /app
+    ports:
+      - "${PORT:-8090}:80"
+    volumes:
+      - .:/app
+      - ../..:/var/phpstan-frankenphp
+      - ./docker/frankenphp/Caddyfile.dev:/etc/frankenphp/Caddyfile.dev
+      - ./docker/php-dev.ini:/usr/local/etc/php/conf.d/99-dev.ini:ro
+      - composer-cache:/root/.composer/cache
+    environment:
+      - COMPOSER_ALLOW_SUPERUSER=1
+      - COMPOSER_MEMORY_LIMIT=-1
+      - COMPOSER_MAX_PARALLEL_HTTP=4
+      - APP_ENV=dev
+      - APP_DEBUG=1
+      - APP_SECRET=${APP_SECRET:-demo-secret}
+      - FRANKENPHP_MODE=${FRANKENPHP_MODE:-worker}
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+      - 1.1.1.1
+      - 1.0.0.1
+    mem_limit: 2g
+    networks:
+      - phpstan-frankenphp-demo-network
+
+volumes:
+  composer-cache:
+    driver: local
+
+networks:
+  phpstan-frankenphp-demo-network:
+    driver: bridge

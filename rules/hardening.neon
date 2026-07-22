@@ -1,0 +1,22 @@
+# Level 3 — production hardening
+services:
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoUnlimitedExecutionTimeRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoUnlimitedMemoryRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoPcntlForkRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoBlockingSleepRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoRegisterTickFunctionRule
+        tags:
+            - phpstan.rules.rule

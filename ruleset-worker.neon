@@ -1,0 +1,4 @@
+# Level 2 — FrankenPHP classic → worker
+# Apply after classic is clean. Detects state that survives across requests.
+includes:
+    - rules/worker.neon

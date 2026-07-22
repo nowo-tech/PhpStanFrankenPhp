@@ -1,0 +1,6 @@
+# All FrankenPHP migration rules (classic + worker + hardening).
+# Prefer adopting rulesets in order: classic → worker → hardening.
+includes:
+    - ruleset-classic.neon
+    - ruleset-worker.neon
+    - ruleset-hardening.neon

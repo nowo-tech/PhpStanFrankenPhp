@@ -1,0 +1,4 @@
+# Level 3 — production hardening under FrankenPHP
+# Apply last. Detects unlimited resources, fork/tick misuse, blocking sleeps.
+includes:
+    - rules/hardening.neon

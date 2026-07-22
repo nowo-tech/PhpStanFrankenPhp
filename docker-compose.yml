@@ -1,0 +1,18 @@
+name: phpstan-frankenphp
+
+services:
+  php:
+    build: .
+    container_name: phpstan-frankenphp-php
+    working_dir: /app
+    volumes:
+      - .:/app
+      - composer-cache:/root/.composer/cache
+      - coverage-data:/app/coverage
+    environment:
+      - COMPOSER_ALLOW_SUPERUSER=1
+    command: ["tail", "-f", "/dev/null"]
+
+volumes:
+  composer-cache:
+  coverage-data:

@@ -1,0 +1,10 @@
+includes:
+    - ../extension.neon
+    - ../ruleset-hardening.neon
+
+parameters:
+    level: 0
+    paths:
+        - hardening
+    excludePaths:
+        - hardening/good

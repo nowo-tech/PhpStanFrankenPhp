@@ -1,0 +1,22 @@
+# Level 1 — FPM → FrankenPHP classic
+services:
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Classic\NoExitOrDieRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Classic\NoFastCgiFinishRequestRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Classic\NoPutenvRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Classic\NoIgnoreUserAbortRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Classic\NoUnlimitedIoTimeoutRule
+        tags:
+            - phpstan.rules.rule

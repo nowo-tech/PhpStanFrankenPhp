@@ -1,0 +1,12 @@
+---
+description: PHPStan extension package conventions
+alwaysApply: true
+---
+
+This package ships PHPStan rules for FrankenPHP migration.
+
+- Register rules in `rules/{classic,worker,hardening}.neon` with `phpstan.rules.rule` tags.
+- Keep `extension.neon` free of enabled rules; only schema/defaults.
+- Every rule needs: stable `frankenphp.*` identifier, docs in `docs/RULES.md`, RuleTestCase, and `demo/*/bad` + `demo/*/good` samples.
+- Adopt levels in order: classic → worker → hardening (`ruleset-worker-strict.neon` is optional).
+- Use `declare(strict_types=1);` on every PHP file.

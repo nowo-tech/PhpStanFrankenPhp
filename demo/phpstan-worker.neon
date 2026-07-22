@@ -1,0 +1,10 @@
+includes:
+    - ../extension.neon
+    - ../ruleset-worker.neon
+
+parameters:
+    level: 0
+    paths:
+        - worker
+    excludePaths:
+        - worker/good

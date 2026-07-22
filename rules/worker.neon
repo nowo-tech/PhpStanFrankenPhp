@@ -1,0 +1,46 @@
+# Level 2 — FrankenPHP classic → worker
+parameters:
+    frankenphp:
+        # When true, also flag $_GET/$_POST/$_COOKIE/$_FILES/$_REQUEST/$_SERVER.
+        # Default false: FrankenPHP resets those between requests; $_ENV/$_SESSION stay flagged.
+        flagRequestSuperglobals: false
+
+services:
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoMutableStaticPropertyRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoStaticLocalVariableRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoGlobalStateWriteRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoSuperglobalAccessRule
+        arguments:
+            flagRequestSuperglobals: %frankenphp.flagRequestSuperglobals%
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoNativeSessionApiRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoPersistentIniSetRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoSingletonGetInstanceRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoRegisterShutdownFunctionRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoSetErrorExceptionHandlerRule
+        tags:
+            - phpstan.rules.rule

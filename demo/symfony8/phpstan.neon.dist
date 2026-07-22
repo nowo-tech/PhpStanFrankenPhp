@@ -1,0 +1,10 @@
+includes:
+    - vendor/nowo-tech/phpstan-frankenphp/extension.neon
+    - vendor/nowo-tech/phpstan-frankenphp/ruleset-classic.neon
+
+parameters:
+    level: 5
+    paths:
+        - src
+    excludePaths:
+        - src/Good

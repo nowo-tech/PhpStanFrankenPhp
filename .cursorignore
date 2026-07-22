@@ -1,0 +1,51 @@
+# Dependencies
+/vendor/
+/node_modules/
+
+# Symfony demo runtime
+/demo/symfony8/var/
+/demo/symfony8/vendor/
+
+# Build / coverage
+/dist/
+/build/
+/coverage/
+/.vite/
+
+# Caches / analysis
+/.php-cs-fixer.cache
+/.phpstan.cache
+/.psalm/
+.phpstan.result.cache
+/phpunit.xml.cache
+/.phpunit.cache/
+
+# Locks
+composer.lock
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# IDE / local env
+/.idea/
+/.vscode/
+/.env
+/.env.*
+!.env.example
+!demo/symfony8/.env.example
+!demo/symfony8/.env.test
+
+# Heavy / binary / logs
+*.log
+*.sql
+*.zip
+*.tar
+*.gz
+
+# Secrets
+*.pem
+*.key
+*.p12
+
+# Cursor local sandbox
+.cursor/sandbox.json

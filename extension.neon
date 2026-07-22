@@ -1,0 +1,24 @@
+# Default include: registers parameter schema only.
+# Consumers choose a ruleset explicitly (recommended migration path):
+#   includes:
+#     - vendor/nowo-tech/phpstan-frankenphp/ruleset-classic.neon
+# then later:
+#     - vendor/nowo-tech/phpstan-frankenphp/ruleset-worker.neon
+# optionally strict:
+#     - vendor/nowo-tech/phpstan-frankenphp/ruleset-worker-strict.neon
+# then:
+#     - vendor/nowo-tech/phpstan-frankenphp/ruleset-hardening.neon
+#
+# Or enable everything at once:
+#     - vendor/nowo-tech/phpstan-frankenphp/rules.neon
+
+parametersSchema:
+    frankenphp: structure([
+        flagRequestSuperglobals: bool()
+    ])
+
+parameters:
+    frankenphp:
+        flagRequestSuperglobals: false
+
+services: []
