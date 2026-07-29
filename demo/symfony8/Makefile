@@ -1,10 +1,13 @@
 # PhpStanFrankenPhp — Symfony 8 FrankenPHP demo
 
 .PHONY: help up down build install shell logs test phpstan-classic phpstan-worker phpstan-hardening \
-	cache-clear ensure-up verify update-package
+	cache-clear ensure-up verify update-package update-bundle
 
 SERVICE_PHP ?= php
-DC = docker compose
+# Prefer Compose V2 plugin; fall back to docker-compose V1 (REQ-MAKE-010).
+# Use absolute docker path — a local `docker/` directory must not shadow the CLI.
+DOCKER_BIN := $(shell command -v docker 2>/dev/null || echo docker)
+DC := $(shell $(DOCKER_BIN) compose version >/dev/null 2>&1 && echo "$(DOCKER_BIN) compose" || command -v docker-compose 2>/dev/null || echo docker-compose)
 
 help:
 	@echo "PhpStanFrankenPhp — Symfony 8 demo"
@@ -14,6 +17,7 @@ help:
 	@echo "  make phpstan-hardening  Analyse all levels"
 	@echo "  make test               PHPUnit"
 	@echo "  make verify             HTTP 200 smoke"
+	@echo "  make update-bundle      Refresh path-repo package(s) + clear cache"
 
 up:
 	@if [ ! -f .env ]; then cp .env.example .env; fi
@@ -67,6 +71,9 @@ update-package: ensure-up
 	$(DC) exec -T $(SERVICE_PHP) composer update nowo-tech/phpstan-frankenphp --no-interaction
 	$(DC) exec -T $(SERVICE_PHP) php bin/console cache:clear
 
+# REQ-DEMO-007: sync mounted package code before tests / release-verify
+update-bundle: update-package
+
 verify:
 	@if [ ! -f .env ]; then cp .env.example .env; fi
 	@port=$$(grep '^PORT=' .env 2>/dev/null | cut -d= -f2 | tr -d '\r'); [ -z "$$port" ] && port=8090; \
@@ -77,4 +84,5 @@ verify:
 
 # REQ-MAKE-008
 BUNDLE_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/../..)
-include $(BUNDLE_ROOT)/../.scripts/Makefile.demo-update-deps.mk
+# Optional: monorepo helper absent on standalone GitHub Actions checkout (REQ-MAKE-009).
+-include $(BUNDLE_ROOT)/../.scripts/Makefile.demo-update-deps.mk

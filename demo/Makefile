@@ -2,8 +2,12 @@
 
 DEMOS := symfony8
 
+# Prefer Compose V2 plugin; fall back to docker-compose V1 (REQ-MAKE-010).
+DOCKER_BIN := $(shell command -v docker 2>/dev/null || echo docker)
+COMPOSE ?= $(shell $(DOCKER_BIN) compose version >/dev/null 2>&1 && echo "$(DOCKER_BIN) compose" || command -v docker-compose 2>/dev/null || echo docker-compose)
+
 .PHONY: help up-symfony8 down-symfony8 verify-symfony8 phpstan-symfony8 clean
-.PHONY: up down verify release-check release-verify test-symfony8
+.PHONY: up down verify release-check release-verify test-symfony8 update-bundle-all
 
 help:
 	@echo "PhpStanFrankenPhp demos"
@@ -11,6 +15,7 @@ help:
 	@echo "  make verify-symfony8      HTTP 200 smoke"
 	@echo "  make phpstan-symfony8     Run classic+worker+hardening PHPStan in the demo"
 	@echo "  make release-check        For root release-check: test + HTTP 200 + tear down"
+	@echo "  make update-bundle-all    Refresh path-repo packages in all demos"
 	@echo ""
 	@echo "Fixture-only demos (no HTTP): see ../demo/README.md (classic/worker/hardening folders)"
 
@@ -43,14 +48,21 @@ verify:
 test-symfony8:
 	@$(MAKE) -C symfony8 test
 
+update-bundle-all:
+	@for demo in $(DEMOS); do \
+		echo "=== update-bundle $$demo ==="; \
+		$(MAKE) -C $$demo update-bundle; \
+	done
+
 release-verify:
 	@for demo in $(DEMOS); do \
 		echo "=== release-verify $$demo ==="; \
+		$(MAKE) -C $$demo update-bundle; \
 		$(MAKE) -C $$demo verify; \
 		$(MAKE) -C $$demo down; \
 	done
 
-release-check: test-symfony8 release-verify
+release-check: update-bundle-all test-symfony8 release-verify
 	@echo "All demos passed release-check."
 
 clean:
@@ -59,4 +71,5 @@ clean:
 
 # REQ-MAKE-008
 BUNDLE_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/..)
-include $(BUNDLE_ROOT)/../.scripts/Makefile.demo-aggregate-update-deps.mk
+# Optional: monorepo helper absent on standalone GitHub Actions checkout (REQ-MAKE-009).
+-include $(BUNDLE_ROOT)/../.scripts/Makefile.demo-aggregate-update-deps.mk

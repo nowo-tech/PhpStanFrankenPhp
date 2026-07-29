@@ -9,6 +9,12 @@
 2. Read [CHANGELOG.md](CHANGELOG.md) for the target version.
 3. Re-run PHPStan with your chosen rulesets and the package demos if you maintain local forks of fixtures.
 
+## Upgrading to 1.0.2
+
+No rule behaviour changes and **no consumer action required**. Continue requiring `nowo-tech/phpstan-frankenphp: ^1.0`.
+
+**Contributors:** new Make targets (`check-open-prs`, `demo-smoke`), Compose V2→V1 detection, Symfony 8 demo DebugBundle/Twig Inspector updates, and an explicit empty `ignoreErrors` in this package’s `phpstan.neon.dist`.
+
 ## Upgrading to 1.0.1
 
 Documentation-only release. No rule behaviour changes and **no consumer action required**.

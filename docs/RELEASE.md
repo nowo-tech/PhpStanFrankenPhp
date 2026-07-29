@@ -1,6 +1,6 @@
 # Release
 
-Current stable: **v1.0.1** (2026-07-22).
+Current stable: **v1.0.2** (2026-07-29).
 
 ## Checklist
 
@@ -11,8 +11,9 @@ Current stable: **v1.0.1** (2026-07-22).
 5. `make check-no-cursor-coauthor` (after the release commit, before push).
 6. Annotated tag and push:
    ```bash
-   git tag -a vX.Y.Z -m "Release vX.Y.Z"
-   git push origin main --tags
+   git tag -a v1.0.2 -m "Release v1.0.2 - FrankenPHP banner, Make demos/smoke, security checklist"
+   git push origin main
+   git push origin v1.0.2
    ```
 7. GitHub Actions [`release.yml`](../.github/workflows/release.yml) creates the GitHub Release from the tag and changelog section.
 

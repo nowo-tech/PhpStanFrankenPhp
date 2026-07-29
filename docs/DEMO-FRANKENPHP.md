@@ -49,3 +49,13 @@ Or via the demo aggregator:
 ```bash
 make -C demo up-symfony8
 ```
+
+## Demo smoke
+
+From the package root:
+
+```bash
+make demo-smoke
+```
+
+Runs `demo/Makefile` `release-verify` (update-bundle → HTTP 200 → down).

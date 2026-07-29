@@ -2,6 +2,10 @@
 
 [![CI](https://github.com/nowo-tech/PhpStanFrankenPhp/actions/workflows/ci.yml/badge.svg)](https://github.com/nowo-tech/PhpStanFrankenPhp/actions/workflows/ci.yml) [![Packagist Version](https://img.shields.io/packagist/v/nowo-tech/phpstan-frankenphp.svg?style=flat)](https://packagist.org/packages/nowo-tech/phpstan-frankenphp) [![Packagist Downloads](https://img.shields.io/packagist/dt/nowo-tech/phpstan-frankenphp.svg)](https://packagist.org/packages/nowo-tech/phpstan-frankenphp) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![PHP](https://img.shields.io/badge/PHP-8.1%2B-777BB4?logo=php)](https://php.net) [![PHPStan](https://img.shields.io/badge/PHPStan-2.x-4F5D95?logo=php)](https://phpstan.org) [![GitHub stars](https://img.shields.io/github/stars/nowo-tech/phpstan-frankenphp.svg?style=social&label=Star)](https://github.com/nowo-tech/PhpStanFrankenPhp) [![Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen)](#tests-and-coverage)
 
+![FrankenPHP Friendly Worker Mode](docs/images/frankenphp-friendly.png)
+
+This bundle is **FrankenPHP worker mode friendly**.
+
 > ⭐ **Found this useful?** Install from [Packagist](https://packagist.org/packages/nowo-tech/phpstan-frankenphp) and star the repository on [GitHub](https://github.com/nowo-tech/PhpStanFrankenPhp).
 
 PHPStan rules that help you migrate from **PHP-FPM** to **FrankenPHP classic**, then to **worker** mode. Rules are split by level, documented with justification, and shipped with demos for every case.

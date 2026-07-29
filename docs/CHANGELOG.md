@@ -8,10 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.0.2] - 2026-07-29](#102-2026-07-29)
 - [[1.0.1] - 2026-07-22](#101-2026-07-22)
 - [[1.0.0] - 2026-07-22](#100-2026-07-22)
 
 ## [Unreleased]
+
+## [1.0.2] - 2026-07-29
+
+### Added
+
+- FrankenPHP-friendly banner in README (`docs/images/frankenphp-friendly.png`)
+- Make targets: `check-open-prs`, `demo-smoke`; Compose V2→V1 detection (REQ-MAKE-010)
+- Demo Symfony 8: `DebugBundle` + Twig Inspector; `update-bundle`; `SYMFONY_DEPRECATIONS_HELPER=max[direct]=0`
+- Explicit `ignoreErrors: []` in `phpstan.neon.dist`; release security checklist (12.4.1) in `docs/SECURITY.md`
+
+### Changed
+
+- GitHub About / Packagist description shortened for clarity
 
 ## [1.0.1] - 2026-07-22
 
@@ -41,6 +55,7 @@ First stable release of `nowo-tech/phpstan-frankenphp`: PHPStan rules to migrate
 - `NoSuperglobalAccessRule` defaults to `$_ENV` + `$_SESSION` only (aligned with FrankenPHP worker reset behaviour); request superglobals are opt-in via worker-strict / `flagRequestSuperglobals`.
 - Mutable static guidance no longer recommends invalid `readonly static` properties.
 
-[Unreleased]: https://github.com/nowo-tech/PhpStanFrankenPhp/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/nowo-tech/PhpStanFrankenPhp/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.0.2
 [1.0.1]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.0.1
 [1.0.0]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.0.0

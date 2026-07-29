@@ -9,6 +9,8 @@
         <server name="KERNEL_CLASS" value="App\Kernel" force="true"/>
         <server name="APP_ENV" value="test" force="true"/>
         <env name="FRANKENPHP_MODE" value="worker"/>
+        <!-- REQ-SF-005: fail on direct Symfony deprecations -->
+        <env name="SYMFONY_DEPRECATIONS_HELPER" value="max[direct]=0"/>
 
         <!-- ###+ symfony/framework-bundle ### -->
         <env name="APP_ENV" value="dev"/>

@@ -1,12 +1,19 @@
 # PhpStanFrankenPhp — root Makefile (Docker workflow)
 
-COMPOSE ?= docker compose
+# Prefer Compose V2; absolute docker path avoids shadowing by local docker/ when PATH has "." (REQ-MAKE-010).
+DOCKER_BIN := $(shell command -v docker 2>/dev/null)
+ifeq ($(DOCKER_BIN),)
+COMPOSE_BIN := docker-compose
+else
+COMPOSE_BIN := $(shell $(DOCKER_BIN) compose version >/dev/null 2>&1 && echo "$(DOCKER_BIN) compose" || echo "docker-compose")
+endif
+COMPOSE     ?= $(COMPOSE_BIN)
 SERVICE_PHP ?= php
 
 .PHONY: help ensure-up up down build shell install assets test test-coverage \
 	coverage-check test-coverage-100 \
-	demo-symfony8 demo-symfony8-verify demo-symfony8-phpstan \
-	check-no-cursor-coauthor strip-cursor-coauthor-from-history \
+	demo-symfony8 demo-symfony8-verify demo-symfony8-phpstan demo-smoke \
+	check-no-cursor-coauthor check-open-prs strip-cursor-coauthor-from-history \
 	cs-check cs-fix rector rector-dry phpstan qa release-check release-check-demos \
 	composer-sync clean update validate setup-hooks \
 	demo-classic demo-worker demo-hardening demo-all \
@@ -21,14 +28,16 @@ help:
 	@echo "Quality: cs-check, cs-fix, rector, rector-dry, phpstan, qa"
 	@echo "Demos: demo-classic, demo-worker, demo-hardening, demo-all"
 	@echo "Demo (clean): demo-classic-good, demo-worker-good, demo-hardening-good"
-	@echo "Release: release-check, release-check-demos, composer-sync"
+	@echo "Release: release-check, release-check-demos, demo-smoke, check-open-prs, composer-sync"
 	@echo "Other: setup-hooks, ensure-up, clean"
 
 ensure-up:
-	@echo "Ensuring Docker environment is up..."
-	@$(COMPOSE) up -d --build
-	@sleep 8
-	@$(COMPOSE) exec -T $(SERVICE_PHP) composer install --no-interaction
+	@if ! $(COMPOSE) exec -T $(SERVICE_PHP) true 2>/dev/null; then \
+		echo "Starting container..."; \
+		$(COMPOSE) up -d; \
+		sleep 3; \
+		$(COMPOSE) exec -T $(SERVICE_PHP) composer install --no-interaction; \
+	fi
 
 up:
 	@$(COMPOSE) up -d --build
@@ -107,7 +116,14 @@ composer-sync: ensure-up
 	@$(COMPOSE) exec -T $(SERVICE_PHP) composer validate --strict
 	@$(COMPOSE) exec -T $(SERVICE_PHP) composer install --no-interaction
 
-release-check: check-no-cursor-coauthor ensure-up composer-sync cs-fix cs-check rector-dry phpstan coverage-check release-check-demos
+check-open-prs:
+	@chmod +x .scripts/check-open-prs.sh
+	@GH_REPO=nowo-tech/PhpStanFrankenPhp ./.scripts/check-open-prs.sh
+
+demo-smoke:
+	@if [ -f demo/Makefile ]; then $(MAKE) -C demo release-verify; else echo "No demo/Makefile"; exit 1; fi
+
+release-check: check-no-cursor-coauthor check-open-prs ensure-up composer-sync cs-fix cs-check rector-dry phpstan coverage-check release-check-demos
 
 release-check-demos:
 	@echo "=== Fixture demos: bad samples must produce findings ==="
@@ -148,7 +164,8 @@ setup-hooks:
 
 # REQ-MAKE-008: update-deps
 BUNDLE_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-include $(BUNDLE_ROOT)/../.scripts/Makefile.update-deps.mk
+# Optional: monorepo helper absent on standalone GitHub Actions checkout (REQ-MAKE-009).
+-include $(BUNDLE_ROOT)/../.scripts/Makefile.update-deps.mk
 
 strip-cursor-coauthor-from-history:
 	@chmod +x .scripts/strip-cursor-coauthor-from-history.sh

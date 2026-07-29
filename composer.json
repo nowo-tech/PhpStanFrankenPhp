@@ -1,6 +1,6 @@
 {
     "name": "nowo-tech/phpstan-frankenphp",
-    "description": "PHPStan rules to migrate PHP apps from PHP-FPM to FrankenPHP classic mode, then worker mode. Rules are split by migration level with documented justification and application order.",
+    "description": "PHPStan rules that help you migrate from PHP-FPM to FrankenPHP classic, then to worker mode. Rules are split by level with demos for every case.",
     "type": "phpstan-extension",
     "license": "MIT",
     "keywords": [

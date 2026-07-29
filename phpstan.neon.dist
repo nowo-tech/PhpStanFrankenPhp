@@ -7,6 +7,8 @@ parameters:
         - tests/Fixtures
         - tests/Unit/DirectProcessNodeCoverageTest.php
     treatPhpDocTypesAsCertain: false
+    # REQ-CS-006: never silence findings here — fix the code instead
+    ignoreErrors: []
 
 includes:
     - vendor/phpstan/phpstan-phpunit/extension.neon
