@@ -6,6 +6,7 @@ namespace NowoTech\PhpStanFrankenPhp\Rule\Classic;
 
 use NowoTech\PhpStanFrankenPhp\Support\NodeHelper;
 use PhpParser\Node;
+use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Identifier;
@@ -110,7 +111,7 @@ final class NoUnlimitedIoTimeoutRule implements Rule
     {
         $option = NodeHelper::argExpr($node, 1);
         $value = NodeHelper::argExpr($node, 2);
-        if (null === $option || null === $value) {
+        if (!$option instanceof Expr || !$value instanceof Expr) {
             return [];
         }
 
@@ -133,7 +134,7 @@ final class NoUnlimitedIoTimeoutRule implements Rule
     private function checkCurlSetoptArray(FuncCall $node): array
     {
         $options = NodeHelper::argExpr($node, 1);
-        if (!$options instanceof Node\Expr\Array_) {
+        if (!$options instanceof Expr\Array_) {
             return [];
         }
 
@@ -155,9 +156,9 @@ final class NoUnlimitedIoTimeoutRule implements Rule
         return [];
     }
 
-    private function isCurlTimeoutOption(Node\Expr $expr): bool
+    private function isCurlTimeoutOption(Expr $expr): bool
     {
-        if (!$expr instanceof Node\Expr\ConstFetch) {
+        if (!$expr instanceof Expr\ConstFetch) {
             return false;
         }
 

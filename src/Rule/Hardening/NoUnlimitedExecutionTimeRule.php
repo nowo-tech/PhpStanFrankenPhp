@@ -6,6 +6,7 @@ namespace NowoTech\PhpStanFrankenPhp\Rule\Hardening;
 
 use NowoTech\PhpStanFrankenPhp\Support\NodeHelper;
 use PhpParser\Node;
+use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\FuncCall;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
@@ -32,7 +33,7 @@ final class NoUnlimitedExecutionTimeRule implements Rule
         }
 
         $arg = NodeHelper::firstArgExpr($node);
-        if (null === $arg || !NodeHelper::isZeroLikeLiteral($arg)) {
+        if (!$arg instanceof Expr || !NodeHelper::isZeroLikeLiteral($arg)) {
             return [];
         }
 

@@ -6,6 +6,7 @@ namespace NowoTech\PhpStanFrankenPhp\Rule\Hardening;
 
 use NowoTech\PhpStanFrankenPhp\Support\NodeHelper;
 use PhpParser\Node;
+use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Scalar\String_;
 use PHPStan\Analyser\Scope;
@@ -34,7 +35,7 @@ final class NoUnlimitedMemoryRule implements Rule
 
         $key = NodeHelper::argExpr($node, 0);
         $value = NodeHelper::argExpr($node, 1);
-        if (null === $key || null === $value) {
+        if (!$key instanceof Expr || !$value instanceof Expr) {
             return [];
         }
 
@@ -47,7 +48,7 @@ final class NoUnlimitedMemoryRule implements Rule
             $unlimited = true;
         } elseif ($value instanceof String_ && \in_array(strtolower(trim($value->value)), ['-1', '0'], true)) {
             $unlimited = true;
-        } elseif ($value instanceof Node\Expr\UnaryMinus && $value->expr instanceof Node\Scalar\LNumber && 1 === $value->expr->value) {
+        } elseif ($value instanceof Expr\UnaryMinus && $value->expr instanceof Node\Scalar\LNumber && 1 === $value->expr->value) {
             $unlimited = true;
         }
 

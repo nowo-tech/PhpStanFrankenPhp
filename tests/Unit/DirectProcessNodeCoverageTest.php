@@ -36,6 +36,7 @@ use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\Nop;
 use PHPStan\Analyser\Scope;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -44,7 +45,7 @@ use PHPUnit\Framework\TestCase;
  */
 final class DirectProcessNodeCoverageTest extends TestCase
 {
-    private Scope $scope;
+    private MockObject $scope;
 
     protected function setUp(): void
     {

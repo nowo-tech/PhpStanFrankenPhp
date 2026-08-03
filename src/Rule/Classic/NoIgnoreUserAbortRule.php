@@ -6,6 +6,7 @@ namespace NowoTech\PhpStanFrankenPhp\Rule\Classic;
 
 use NowoTech\PhpStanFrankenPhp\Support\NodeHelper;
 use PhpParser\Node;
+use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\FuncCall;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
@@ -34,12 +35,12 @@ final class NoIgnoreUserAbortRule implements Rule
 
         $arg = NodeHelper::firstArgExpr($node);
         // No argument = query current setting; only flag enabling calls.
-        if (null === $arg) {
+        if (!$arg instanceof Expr) {
             return [];
         }
 
         $enables = false;
-        if ($arg instanceof Node\Expr\ConstFetch) {
+        if ($arg instanceof Expr\ConstFetch) {
             $name = strtolower($arg->name->toString());
             $enables = \in_array($name, ['true', '1'], true);
         } elseif ($arg instanceof Node\Scalar\LNumber) {

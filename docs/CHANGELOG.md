@@ -8,11 +8,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.0.3] - 2026-08-03](#103-2026-08-03)
 - [[1.0.2] - 2026-07-29](#102-2026-07-29)
 - [[1.0.1] - 2026-07-22](#101-2026-07-22)
 - [[1.0.0] - 2026-07-22](#100-2026-07-22)
 
 ## [Unreleased]
+
+## [1.0.3] - 2026-08-03
+
+### Added
+
+- GitHub Spec Kit Cursor Agent scaffold under `.specify/` (constitution, templates, workflows)
+- `.github/copilot-instructions.md` for maintainer/agent conventions
+
+### Changed
+
+- Deep Spec Kit baseline: `specs/001-baseline/spec.md` with semantic `FR-*` requirements and user scenarios; `code-inventory.md` maps **20/20** production PHP files under `src/` (REQ-SPECKIT-003)
+- CI: bump `actions/stale` from v10 to v11
+- Internal Rector/CS cleanups (exclusive type checks); skip `ReduceAlwaysFalseIfOrRector` so `processNode` instanceof guards stay for early-return coverage; no public API or reported-error changes
+
+### Notes
+
+- **No rule behaviour changes** and **no consumer action required**. Continue requiring `nowo-tech/phpstan-frankenphp: ^1.0`.
 
 ## [1.0.2] - 2026-07-29
 
@@ -55,7 +73,8 @@ First stable release of `nowo-tech/phpstan-frankenphp`: PHPStan rules to migrate
 - `NoSuperglobalAccessRule` defaults to `$_ENV` + `$_SESSION` only (aligned with FrankenPHP worker reset behaviour); request superglobals are opt-in via worker-strict / `flagRequestSuperglobals`.
 - Mutable static guidance no longer recommends invalid `readonly static` properties.
 
-[Unreleased]: https://github.com/nowo-tech/PhpStanFrankenPhp/compare/v1.0.2...HEAD
+[Unreleased]: https://github.com/nowo-tech/PhpStanFrankenPhp/compare/v1.0.3...HEAD
+[1.0.3]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.0.3
 [1.0.2]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.0.2
 [1.0.1]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.0.1
 [1.0.0]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.0.0

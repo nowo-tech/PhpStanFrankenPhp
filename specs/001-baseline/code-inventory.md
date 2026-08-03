@@ -1,56 +1,65 @@
-# Code inventory — baseline
+# Code inventory — 100% traceability
 
-## Rulesets
+**Baseline spec**: [`spec.md`](spec.md)  
+**Package**: `nowo-tech/phpstan-frankenphp`  
+**Last audited**: 2026-08-03
 
-| File | Level |
-|------|-------|
-| `ruleset-classic.neon` → `rules/classic.neon` | 1 |
-| `ruleset-worker.neon` / `ruleset-worker-strict.neon` → `rules/worker.neon` | 2 |
-| `ruleset-hardening.neon` → `rules/hardening.neon` | 3 |
-| `rules.neon` | all |
-| `extension.neon` | empty (installer hook) |
+Every production PHP file under `src/` is mapped below. Tests under `tests/` and demo fixtures under `demo/` are validated separately (see spec acceptance criteria).
 
-## Rule classes
+## Support utilities
 
-### Classic (`src/Rule/Classic`)
+| Source file | Spec section | Requirement IDs |
+| --- | --- | --- |
+| `Support/NodeHelper.php` | Shared AST helpers for rules | FR-SUP-001 |
 
-- `NoExitOrDieRule`
-- `NoFastCgiFinishRequestRule`
-- `NoPutenvRule`
-- `NoIgnoreUserAbortRule`
-- `NoUnlimitedIoTimeoutRule`
+## Classic rules (`src/Rule/Classic`)
 
-### Worker (`src/Rule/Worker`)
+| Source file | Spec section | Requirement IDs |
+| --- | --- | --- |
+| `Rule/Classic/NoExitOrDieRule.php` | Classic level — no exit/die | FR-CLS-001 |
+| `Rule/Classic/NoFastCgiFinishRequestRule.php` | Classic — no fastcgi_finish_request | FR-CLS-002 |
+| `Rule/Classic/NoPutenvRule.php` | Classic — no putenv | FR-CLS-003 |
+| `Rule/Classic/NoIgnoreUserAbortRule.php` | Classic — no ignore_user_abort | FR-CLS-004 |
+| `Rule/Classic/NoUnlimitedIoTimeoutRule.php` | Classic — bounded I/O timeouts | FR-CLS-005 |
 
-- `NoMutableStaticPropertyRule`
-- `NoStaticLocalVariableRule`
-- `NoGlobalStateWriteRule`
-- `NoSuperglobalAccessRule`
-- `NoNativeSessionApiRule`
-- `NoPersistentIniSetRule`
-- `NoSingletonGetInstanceRule`
-- `NoRegisterShutdownFunctionRule`
-- `NoSetErrorExceptionHandlerRule`
+## Worker rules (`src/Rule/Worker`)
 
-### Hardening (`src/Rule/Hardening`)
+| Source file | Spec section | Requirement IDs |
+| --- | --- | --- |
+| `Rule/Worker/NoMutableStaticPropertyRule.php` | Worker — no mutable statics | FR-WRK-001 |
+| `Rule/Worker/NoStaticLocalVariableRule.php` | Worker — no static locals | FR-WRK-002 |
+| `Rule/Worker/NoGlobalStateWriteRule.php` | Worker — no global state writes | FR-WRK-003 |
+| `Rule/Worker/NoSuperglobalAccessRule.php` | Worker — limit superglobal reads | FR-WRK-004 |
+| `Rule/Worker/NoNativeSessionApiRule.php` | Worker — no native session API | FR-WRK-005 |
+| `Rule/Worker/NoPersistentIniSetRule.php` | Worker — no persistent ini_set | FR-WRK-006 |
+| `Rule/Worker/NoSingletonGetInstanceRule.php` | Worker — no singleton getInstance | FR-WRK-007 |
+| `Rule/Worker/NoRegisterShutdownFunctionRule.php` | Worker — no register_shutdown_function | FR-WRK-008 |
+| `Rule/Worker/NoSetErrorExceptionHandlerRule.php` | Worker — no custom error/exception handlers | FR-WRK-009 |
 
-- `NoUnlimitedExecutionTimeRule`
-- `NoUnlimitedMemoryRule`
-- `NoPcntlForkRule`
-- `NoBlockingSleepRule`
-- `NoRegisterTickFunctionRule`
+## Hardening rules (`src/Rule/Hardening`)
 
-## Support
+| Source file | Spec section | Requirement IDs |
+| --- | --- | --- |
+| `Rule/Hardening/NoUnlimitedExecutionTimeRule.php` | Hardening — bounded execution time | FR-HRD-001 |
+| `Rule/Hardening/NoUnlimitedMemoryRule.php` | Hardening — bounded memory | FR-HRD-002 |
+| `Rule/Hardening/NoPcntlForkRule.php` | Hardening — no pcntl_fork | FR-HRD-003 |
+| `Rule/Hardening/NoBlockingSleepRule.php` | Hardening — no blocking sleep | FR-HRD-004 |
+| `Rule/Hardening/NoRegisterTickFunctionRule.php` | Hardening — no register_tick_function | FR-HRD-005 |
 
-- `src/Support/NodeHelper.php`
+## Coverage summary
 
-## Tests
+| Category | Files | Mapped |
+| --- | ---: | ---: |
+| Support utilities | 1 | 1 |
+| Classic rules | 5 | 5 |
+| Worker rules | 9 | 9 |
+| Hardening rules | 5 | 5 |
+| **Total production sources (`src/`)** | **20** | **20** |
 
-- `tests/Rule/**/*RuleTest.php`
-- `tests/Fixtures/**`
+## Out of `src/` (documented in spec, not inventory rows)
 
-## Demos
-
-- `demo/classic/{bad,good}`
-- `demo/worker/{bad,good}`
-- `demo/hardening/{bad,good}`
+| Artifact | Requirement IDs |
+| --- | --- |
+| `extension.neon`, `rules.neon`, `ruleset-*.neon`, `rules/*.neon` | FR-RULESET-001 |
+| `demo/{classic,worker,hardening}/{bad,good}` | FR-DEMO-001 |
+| `tests/Rule/**/*RuleTest.php` | FR-TEST-001 |
