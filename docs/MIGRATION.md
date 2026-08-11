@@ -27,7 +27,7 @@ Caveat: you may **stop using FPM-only APIs** (notably `fastcgi_finish_request()`
 1. **Deploy classic** with `FRANKENPHP_MODE=classic` (or `Caddyfile.dev` without `worker`).
 2. Enable **`ruleset-classic.neon`** in PHPStan CI. Fix `exit`/`die`, FastCGI APIs, `putenv`, unbounded I/O.
 3. Smoke-test under load; confirm no process-killing paths remain.
-4. Enable **`ruleset-worker.neon`**. Fix statics, globals, superglobals, singletons, native sessions, sticky `ini_set`.
+4. Enable **`ruleset-worker.neon`**. Fix statics, globals, process-state APIs (`chdir`, `setlocale`, `locale_set_default` / `Locale::setDefault`, timezone/mbstring/`error_reporting`/`umask` mutations), superglobals, singletons, native sessions, sticky `ini_set`.
 5. Switch `FRANKENPHP_MODE=worker` in a staging environment.
 6. Enable **`ruleset-hardening.neon`**. Align PHP timeouts with Caddy/FrankenPHP (REQ-RUNTIME-001).
 7. Set worker `max_requests` as a safety net for residual leaks.
@@ -60,5 +60,6 @@ After enabling `ruleset-worker.neon`, also fix:
 
 - `register_shutdown_function()` — not per-request under workers
 - `set_error_handler()` / `set_exception_handler()` — process-wide leakage
+- `chdir()` / `setlocale()` / `locale_set_default()` / `Locale::setDefault()` / `date_default_timezone_set()` / mbstring encoding setters / `error_reporting(...)` / `umask(...)` — process-wide state leakage
 
 Optionally enable `ruleset-worker-strict.neon` if you want framework-only access to `$_GET`/`$_POST`/… (FrankenPHP already resets those; default rules focus on `$_ENV` / `$_SESSION`).

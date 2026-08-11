@@ -20,3 +20,7 @@ services:
         class: NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoRegisterTickFunctionRule
         tags:
             - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoPcntlSignalRule
+        tags:
+            - phpstan.rules.rule

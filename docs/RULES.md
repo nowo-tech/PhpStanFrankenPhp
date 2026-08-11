@@ -210,6 +210,90 @@ includes:
 
 ---
 
+### `NoChdirRule` — `frankenphp.worker.noChdir`
+
+**Detects:** `chdir()`.
+
+**Why:** The process working directory survives across worker requests; later requests may resolve relative paths against another request's CWD.
+
+**Fix:** Use absolute paths or inject a configured base path.
+
+**Demo:** `demo/worker/bad/NoChdir.php` · good: `demo/worker/good/NoChdirGood.php`
+
+---
+
+### `NoSetLocaleRule` — `frankenphp.worker.noSetLocale`
+
+**Detects:** `setlocale()` **when changing locale** (second argument not `0` / `"0"`).
+
+**Why:** Locale is process-wide and leaks formatting/collation into later requests. Queries via `setlocale($category, 0)` are allowed.
+
+**Fix:** Framework request locale (e.g. Symfony `Request::setLocale` / Translator) or configure locale in php.ini / the image.
+
+**Demo:** `demo/worker/bad/NoSetLocale.php` · good: `demo/worker/good/NoSetLocaleGood.php`
+
+---
+
+### `NoLocaleSetDefaultRule` — `frankenphp.worker.noLocaleSetDefault`
+
+**Detects:** `locale_set_default()` / `Locale::setDefault()`.
+
+**Why:** The ICU default locale is process-wide and leaks intl formatting into later requests. `locale_get_default()` / `Locale::getDefault()` reads stay allowed.
+
+**Fix:** Framework request locale (e.g. Symfony `Request::setLocale` / Translator) or configure intl defaults in php.ini / the image.
+
+**Demo:** `demo/worker/bad/NoLocaleSetDefault.php` · good: `demo/worker/good/NoLocaleSetDefaultGood.php`
+
+---
+
+### `NoDateDefaultTimezoneSetRule` — `frankenphp.worker.noDateDefaultTimezoneSet`
+
+**Detects:** `date_default_timezone_set()`.
+
+**Why:** The default timezone sticks on the worker and changes date/time behaviour for later requests.
+
+**Fix:** Configure `date.timezone` in php.ini / the FrankenPHP image, or pass explicit timezones to DateTime APIs.
+
+**Demo:** `demo/worker/bad/NoDateDefaultTimezoneSet.php` · good: `demo/worker/good/NoDateDefaultTimezoneSetGood.php`
+
+---
+
+### `NoMbEncodingMutationRule` — `frankenphp.worker.noMbEncodingMutation`
+
+**Detects:** `mb_internal_encoding` / `mb_regex_encoding` / `mb_http_output` / `mb_language` **with an argument**.
+
+**Why:** mbstring defaults are process-wide. Calls without an argument (reads) are allowed.
+
+**Fix:** Configure mbstring in php.ini / the image, or pass encodings explicitly to `mb_*` functions.
+
+**Demo:** `demo/worker/bad/NoMbEncodingMutation.php` · good: `demo/worker/good/NoMbEncodingMutationGood.php`
+
+---
+
+### `NoErrorReportingMutationRule` — `frankenphp.worker.noErrorReportingMutation`
+
+**Detects:** `error_reporting(...)` **with a level argument**.
+
+**Why:** Changing the reporting level sticks on the worker. Calls without an argument (reads) are allowed.
+
+**Fix:** Configure `error_reporting` in php.ini / the FrankenPHP image.
+
+**Demo:** `demo/worker/bad/NoErrorReportingMutation.php` · good: `demo/worker/good/NoErrorReportingMutationGood.php`
+
+---
+
+### `NoUmaskRule` — `frankenphp.worker.noUmask`
+
+**Detects:** `umask(...)` **with a mask argument**.
+
+**Why:** The file-creation mask is process-wide. Calls without an argument (reads) are allowed.
+
+**Fix:** Set umask in the process supervisor / container entrypoint, not per request.
+
+**Demo:** `demo/worker/bad/NoUmask.php` · good: `demo/worker/good/NoUmaskGood.php`
+
+---
+
 ## Level 3 — Hardening
 
 ### `NoUnlimitedExecutionTimeRule` — `frankenphp.hardening.noUnlimitedExecutionTime`
@@ -269,6 +353,18 @@ includes:
 **Fix:** Middleware or explicit instrumentation.
 
 **Demo:** `demo/hardening/bad/NoRegisterTickFunction.php` · good: `demo/hardening/good/NoRegisterTickFunctionGood.php`
+
+---
+
+### `NoPcntlSignalRule` — `frankenphp.hardening.noPcntlSignal`
+
+**Detects:** `pcntl_signal`, `pcntl_async_signals`, `pcntl_signal_dispatch`, `pcntl_signal_get_handler`, `pcntl_sigprocmask`, `pcntl_sigwaitinfo`, `pcntl_sigtimedwait`, `pcntl_alarm`.
+
+**Why:** FrankenPHP uses a threaded SAPI; installing, masking, waiting on, or dispatching process signals from request threads is unsafe.
+
+**Fix:** Handle signals in the supervisor / a dedicated process, not from application request code.
+
+**Demo:** `demo/hardening/bad/NoPcntlSignal.php` · good: `demo/hardening/good/NoPcntlSignalGood.php`
 
 ## Identifiers
 

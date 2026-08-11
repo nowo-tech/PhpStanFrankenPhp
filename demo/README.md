@@ -67,6 +67,13 @@ Overview sample: `SafeRequestHandler.php`.
 | `NoSingletonGetInstance.php` (+ `Extra`) | `frankenphp.worker.noSingletonGetInstance` | `NoSingletonGetInstanceGood.php` |
 | `NoRegisterShutdownFunction.php` | `frankenphp.worker.noRegisterShutdownFunction` | `NoRegisterShutdownFunctionGood.php` |
 | `NoSetErrorExceptionHandler.php` | `frankenphp.worker.noSetErrorExceptionHandler` | `NoSetErrorExceptionHandlerGood.php` |
+| `NoChdir.php` | `frankenphp.worker.noChdir` | `NoChdirGood.php` |
+| `NoSetLocale.php` | `frankenphp.worker.noSetLocale` | `NoSetLocaleGood.php` |
+| `NoLocaleSetDefault.php` | `frankenphp.worker.noLocaleSetDefault` | `NoLocaleSetDefaultGood.php` |
+| `NoDateDefaultTimezoneSet.php` | `frankenphp.worker.noDateDefaultTimezoneSet` | `NoDateDefaultTimezoneSetGood.php` |
+| `NoMbEncodingMutation.php` | `frankenphp.worker.noMbEncodingMutation` | `NoMbEncodingMutationGood.php` |
+| `NoErrorReportingMutation.php` | `frankenphp.worker.noErrorReportingMutation` | `NoErrorReportingMutationGood.php` |
+| `NoUmask.php` | `frankenphp.worker.noUmask` | `NoUmaskGood.php` |
 
 Overview sample: `RequestScopedService.php`.
 
@@ -79,6 +86,7 @@ Overview sample: `RequestScopedService.php`.
 | `NoPcntlFork.php` | `frankenphp.hardening.noPcntlFork` | `NoPcntlForkGood.php` |
 | `NoBlockingSleep.php` | `frankenphp.hardening.noBlockingSleep` | `NoBlockingSleepGood.php` |
 | `NoRegisterTickFunction.php` | `frankenphp.hardening.noRegisterTickFunction` | `NoRegisterTickFunctionGood.php` |
+| `NoPcntlSignal.php` | `frankenphp.hardening.noPcntlSignal` | `NoPcntlSignalGood.php` |
 
 Overview sample: `BoundedResources.php`.
 

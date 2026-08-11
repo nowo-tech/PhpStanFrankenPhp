@@ -36,4 +36,12 @@ final class HardeningAntiPatterns
     {
         register_tick_function(static function (): void {});
     }
+
+    public function signals(): void
+    {
+        if (\function_exists('pcntl_signal')) {
+            pcntl_signal(SIGTERM, static function (): void {});
+            pcntl_alarm(1);
+        }
+    }
 }

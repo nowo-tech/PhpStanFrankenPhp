@@ -65,6 +65,42 @@ final class WorkerAntiPatterns
         set_error_handler(static fn (): bool => true);
         set_exception_handler(static function (\Throwable $e): void {});
     }
+
+    public function chdirLeak(): void
+    {
+        chdir('/tmp');
+    }
+
+    public function localeLeak(): void
+    {
+        setlocale(LC_ALL, 'en_US.UTF-8');
+    }
+
+    public function intlLocaleLeak(): void
+    {
+        locale_set_default('en_US');
+    }
+
+    public function timezoneLeak(): void
+    {
+        date_default_timezone_set('Europe/Madrid');
+    }
+
+    public function mbEncodingLeak(): void
+    {
+        mb_internal_encoding('UTF-8');
+        mb_language('uni');
+    }
+
+    public function errorReportingLeak(): void
+    {
+        error_reporting(E_ALL);
+    }
+
+    public function umaskLeak(): void
+    {
+        umask(0o022);
+    }
 }
 
 final class Registry

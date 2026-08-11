@@ -41,11 +41,16 @@ $process->setTimeout(null);
 private static array $cache = [];
 static $count = 0;
 $_ENV['TOKEN'] = $requestToken;
+chdir('/tmp');
+setlocale(LC_ALL, 'en_US.UTF-8');
+locale_set_default('en_US');
 
 // Flagged by hardening rules:
 set_time_limit(0);
 sleep(5);
 pcntl_fork();
+pcntl_signal(SIGTERM, $handler);
+pcntl_alarm(1);
 ```
 
 ## Why
@@ -105,6 +110,7 @@ make demo-all
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Changelog](docs/CHANGELOG.md)
 - [Upgrading](docs/UPGRADING.md)
+- [Roadmap](docs/ROADMAP.md)
 - [Release](docs/RELEASE.md)
 - [Security](docs/SECURITY.md)
 - [Engram](docs/ENGRAM.md)
@@ -114,6 +120,7 @@ make demo-all
 ### Additional documentation
 
 - [Rule catalog](docs/RULES.md)
+- [Roadmap](docs/ROADMAP.md)
 - [Migration guide (FPM → classic → worker)](docs/MIGRATION.md)
 - [FrankenPHP demos](docs/DEMO-FRANKENPHP.md)
 - [Demos](demo/README.md)

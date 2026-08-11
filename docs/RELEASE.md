@@ -1,6 +1,6 @@
 # Release
 
-Current stable: **v1.0.3** (2026-08-03).
+Current stable: **v1.1.0** (2026-08-11).
 
 ## Checklist
 
@@ -11,9 +11,9 @@ Current stable: **v1.0.3** (2026-08-03).
 5. `make check-no-cursor-coauthor` (after the release commit, before push).
 6. Annotated tag and push:
    ```bash
-   git tag -a v1.0.3 -m "Release v1.0.3 - Spec Kit deep baseline and Cursor Agent scaffold"
+   git tag -a v1.1.0 -m "Release v1.1.0 - Worker process-state rules and pcntl signal hardening"
    git push origin main
-   git push origin v1.0.3
+   git push origin v1.1.0
    ```
 7. GitHub Actions [`release.yml`](../.github/workflows/release.yml) creates the GitHub Release from the tag and changelog section.
 

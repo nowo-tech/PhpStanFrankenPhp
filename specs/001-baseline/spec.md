@@ -67,6 +67,13 @@ As a platform engineer, I optionally enable **hardening** rules to block fork, u
 | FR-WRK-007 | `NoSingletonGetInstanceRule` flags singleton `getInstance` patterns |
 | FR-WRK-008 | `NoRegisterShutdownFunctionRule` flags `register_shutdown_function` |
 | FR-WRK-009 | `NoSetErrorExceptionHandlerRule` flags custom error/exception handlers |
+| FR-WRK-010 | `NoChdirRule` flags `chdir()` |
+| FR-WRK-011 | `NoSetLocaleRule` flags `setlocale()` mutations (queries with `0` / `"0"` allowed) |
+| FR-WRK-012 | `NoDateDefaultTimezoneSetRule` flags `date_default_timezone_set()` |
+| FR-WRK-013 | `NoMbEncodingMutationRule` flags mbstring encoding/language setters (with argument) |
+| FR-WRK-014 | `NoErrorReportingMutationRule` flags `error_reporting(...)` mutations |
+| FR-WRK-015 | `NoUmaskRule` flags `umask(...)` mutations |
+| FR-WRK-016 | `NoLocaleSetDefaultRule` flags `locale_set_default()` / `Locale::setDefault()` |
 
 ### Hardening rules
 
@@ -77,6 +84,7 @@ As a platform engineer, I optionally enable **hardening** rules to block fork, u
 | FR-HRD-003 | `NoPcntlForkRule` flags `pcntl_fork` |
 | FR-HRD-004 | `NoBlockingSleepRule` flags blocking `sleep`/`usleep` |
 | FR-HRD-005 | `NoRegisterTickFunctionRule` flags `register_tick_function` |
+| FR-HRD-006 | `NoPcntlSignalRule` flags pcntl signal APIs (`pcntl_signal`, `pcntl_sigprocmask`, `pcntl_alarm`, …) |
 
 ### Demos & tests
 
@@ -89,7 +97,7 @@ As a platform engineer, I optionally enable **hardening** rules to block fork, u
 
 ## Success Criteria
 
-- **SC-001**: **20/20** production PHP files under `src/` mapped in [`code-inventory.md`](code-inventory.md).
+- **SC-001**: **28/28** production PHP files under `src/` mapped in [`code-inventory.md`](code-inventory.md).
 - **SC-002**: `composer test` passes; `composer demo-*-good` reports zero errors; bad demos fail as expected.
 - **SC-003**: `docs/RULES.md` lists every shipped rule with identifier and justification.
 

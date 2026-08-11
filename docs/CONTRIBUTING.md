@@ -15,7 +15,7 @@ make test
 3. Register the service in `rules/<level>.neon`.
 4. Add fixtures under `tests/Fixtures/<Level>/` and a `RuleTestCase`.
 5. Mirror bad/good samples under `demo/<level>/`.
-6. Update `docs/RULES.md`, `demo/README.md`, and `docs/CHANGELOG.md`.
+6. Update `docs/RULES.md`, `demo/README.md`, and `docs/CHANGELOG.md`. Prefer checking [ROADMAP.md](ROADMAP.md) before inventing new rule families.
 
 ## Quality gates
 

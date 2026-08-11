@@ -41,7 +41,20 @@ final class RulesetWiringTest extends TestCase
         $contents = (string) file_get_contents(\dirname(__DIR__, 2).'/rules/worker.neon');
         self::assertStringContainsString('NoRegisterShutdownFunctionRule', $contents);
         self::assertStringContainsString('NoSetErrorExceptionHandlerRule', $contents);
+        self::assertStringContainsString('NoChdirRule', $contents);
+        self::assertStringContainsString('NoSetLocaleRule', $contents);
+        self::assertStringContainsString('NoLocaleSetDefaultRule', $contents);
+        self::assertStringContainsString('NoDateDefaultTimezoneSetRule', $contents);
+        self::assertStringContainsString('NoMbEncodingMutationRule', $contents);
+        self::assertStringContainsString('NoErrorReportingMutationRule', $contents);
+        self::assertStringContainsString('NoUmaskRule', $contents);
         self::assertStringContainsString('flagRequestSuperglobals', $contents);
+    }
+
+    public function testHardeningRulesetRegistersPcntlSignal(): void
+    {
+        $contents = (string) file_get_contents(\dirname(__DIR__, 2).'/rules/hardening.neon');
+        self::assertStringContainsString('NoPcntlSignalRule', $contents);
     }
 
     public function testExtensionDeclaresParameterSchema(): void

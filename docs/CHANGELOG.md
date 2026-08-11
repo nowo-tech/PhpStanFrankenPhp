@@ -8,12 +8,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.1.0] - 2026-08-11](#110-2026-08-11)
 - [[1.0.3] - 2026-08-03](#103-2026-08-03)
 - [[1.0.2] - 2026-07-29](#102-2026-07-29)
 - [[1.0.1] - 2026-07-22](#101-2026-07-22)
 - [[1.0.0] - 2026-07-22](#100-2026-07-22)
 
 ## [Unreleased]
+
+## [1.1.0] - 2026-08-11
+
+### Added
+
+- **Worker rules** for process-wide state that survives FrankenPHP worker requests:
+  - `NoChdirRule` (`frankenphp.worker.noChdir`)
+  - `NoSetLocaleRule` (`frankenphp.worker.noSetLocale`) — queries via `setlocale($category, 0|"0")` allowed
+  - `NoLocaleSetDefaultRule` (`frankenphp.worker.noLocaleSetDefault`) — `locale_set_default()` / `Locale::setDefault()`
+  - `NoDateDefaultTimezoneSetRule` (`frankenphp.worker.noDateDefaultTimezoneSet`)
+  - `NoMbEncodingMutationRule` (`frankenphp.worker.noMbEncodingMutation`) — `mb_internal_encoding` / `mb_regex_encoding` / `mb_http_output` / `mb_language` with an argument; no-arg reads allowed
+  - `NoErrorReportingMutationRule` (`frankenphp.worker.noErrorReportingMutation`)
+  - `NoUmaskRule` (`frankenphp.worker.noUmask`)
+- **Hardening rule:** `NoPcntlSignalRule` (`frankenphp.hardening.noPcntlSignal`) — `pcntl_signal`, `pcntl_async_signals`, `pcntl_signal_dispatch`, `pcntl_signal_get_handler`, `pcntl_sigprocmask`, `pcntl_sigwaitinfo`, `pcntl_sigtimedwait`, `pcntl_alarm`
+- Fixture demos, Symfony 8 anti-patterns, RuleTestCase coverage, and catalog updates in [`RULES.md`](RULES.md)
+- [`ROADMAP.md`](ROADMAP.md) for planned expansions and explicit non-goals
+
+### Notes
+
+- **Consumer action required** if you already enable `ruleset-worker.neon` and/or `ruleset-hardening.neon`: re-run PHPStan and fix or baseline the new identifiers. See [`UPGRADING.md`](UPGRADING.md).
+- Continue requiring `nowo-tech/phpstan-frankenphp: ^1.0` (1.1.0 is a compatible minor).
 
 ## [1.0.3] - 2026-08-03
 
@@ -73,7 +95,8 @@ First stable release of `nowo-tech/phpstan-frankenphp`: PHPStan rules to migrate
 - `NoSuperglobalAccessRule` defaults to `$_ENV` + `$_SESSION` only (aligned with FrankenPHP worker reset behaviour); request superglobals are opt-in via worker-strict / `flagRequestSuperglobals`.
 - Mutable static guidance no longer recommends invalid `readonly static` properties.
 
-[Unreleased]: https://github.com/nowo-tech/PhpStanFrankenPhp/compare/v1.0.3...HEAD
+[Unreleased]: https://github.com/nowo-tech/PhpStanFrankenPhp/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.1.0
 [1.0.3]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.0.3
 [1.0.2]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.0.2
 [1.0.1]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.0.1

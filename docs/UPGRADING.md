@@ -9,11 +9,31 @@
 2. Read [CHANGELOG.md](CHANGELOG.md) for the target version.
 3. Re-run PHPStan with your chosen rulesets and the package demos if you maintain local forks of fixtures.
 
+## Upgrading to 1.1.0
+
+**New rules** land in existing `ruleset-worker.neon` / `ruleset-hardening.neon`. If you already enable those rulesets, expect **new PHPStan findings** until you remediate or baseline them.
+
+Constraint stays `nowo-tech/phpstan-frankenphp: ^1.0` (1.1.0 is a compatible minor).
+
+### Consumer action
+
+1. Re-run PHPStan after upgrade.
+2. Fix process-state leaks (preferred) or ignore by stable identifier when intentional (CLI shim, vendor bridge):
+
+| Level | Identifiers |
+| --- | --- |
+| Worker | `frankenphp.worker.noChdir`, `frankenphp.worker.noSetLocale`, `frankenphp.worker.noLocaleSetDefault`, `frankenphp.worker.noDateDefaultTimezoneSet`, `frankenphp.worker.noMbEncodingMutation`, `frankenphp.worker.noErrorReportingMutation`, `frankenphp.worker.noUmask` |
+| Hardening | `frankenphp.hardening.noPcntlSignal` |
+
+3. Reads that stay allowed: `mb_*` / `error_reporting()` / `umask()` **without** arguments; `setlocale($category, 0)` / `setlocale($category, "0")`; `locale_get_default()` / `Locale::getDefault()`.
+
+See [RULES.md](RULES.md), [MIGRATION.md](MIGRATION.md), and [ROADMAP.md](ROADMAP.md).
+
 ## Upgrading to 1.0.3
 
 Documentation, Spec Kit tooling, Dependabot CI bump (`actions/stale` v11), and internal Rector/CS cleanups. **No rule behaviour changes** and **no consumer action required**. Continue requiring `nowo-tech/phpstan-frankenphp: ^1.0`.
 
-**Contributors:** `.specify/` Cursor Agent scaffold, deep baseline `FR-*` inventory (20/20 `src/` files), and `.github/copilot-instructions.md`.
+**Contributors:** `.specify/` Cursor Agent scaffold, deep baseline `FR-*` inventory (20/20 `src/` files at that release), and `.github/copilot-instructions.md`.
 
 ## Upgrading to 1.0.2
 

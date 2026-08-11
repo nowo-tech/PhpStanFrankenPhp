@@ -2,7 +2,7 @@
 
 **Baseline spec**: [`spec.md`](spec.md)  
 **Package**: `nowo-tech/phpstan-frankenphp`  
-**Last audited**: 2026-08-03
+**Last audited**: 2026-08-10
 
 Every production PHP file under `src/` is mapped below. Tests under `tests/` and demo fixtures under `demo/` are validated separately (see spec acceptance criteria).
 
@@ -35,6 +35,13 @@ Every production PHP file under `src/` is mapped below. Tests under `tests/` and
 | `Rule/Worker/NoSingletonGetInstanceRule.php` | Worker — no singleton getInstance | FR-WRK-007 |
 | `Rule/Worker/NoRegisterShutdownFunctionRule.php` | Worker — no register_shutdown_function | FR-WRK-008 |
 | `Rule/Worker/NoSetErrorExceptionHandlerRule.php` | Worker — no custom error/exception handlers | FR-WRK-009 |
+| `Rule/Worker/NoChdirRule.php` | Worker — no chdir | FR-WRK-010 |
+| `Rule/Worker/NoSetLocaleRule.php` | Worker — no setlocale mutation | FR-WRK-011 |
+| `Rule/Worker/NoLocaleSetDefaultRule.php` | Worker — no locale_set_default / Locale::setDefault | FR-WRK-016 |
+| `Rule/Worker/NoDateDefaultTimezoneSetRule.php` | Worker — no date_default_timezone_set | FR-WRK-012 |
+| `Rule/Worker/NoMbEncodingMutationRule.php` | Worker — no mbstring encoding/language mutation | FR-WRK-013 |
+| `Rule/Worker/NoErrorReportingMutationRule.php` | Worker — no error_reporting mutation | FR-WRK-014 |
+| `Rule/Worker/NoUmaskRule.php` | Worker — no umask mutation | FR-WRK-015 |
 
 ## Hardening rules (`src/Rule/Hardening`)
 
@@ -45,6 +52,7 @@ Every production PHP file under `src/` is mapped below. Tests under `tests/` and
 | `Rule/Hardening/NoPcntlForkRule.php` | Hardening — no pcntl_fork | FR-HRD-003 |
 | `Rule/Hardening/NoBlockingSleepRule.php` | Hardening — no blocking sleep | FR-HRD-004 |
 | `Rule/Hardening/NoRegisterTickFunctionRule.php` | Hardening — no register_tick_function | FR-HRD-005 |
+| `Rule/Hardening/NoPcntlSignalRule.php` | Hardening — no pcntl signal APIs | FR-HRD-006 |
 
 ## Coverage summary
 
@@ -52,9 +60,9 @@ Every production PHP file under `src/` is mapped below. Tests under `tests/` and
 | --- | ---: | ---: |
 | Support utilities | 1 | 1 |
 | Classic rules | 5 | 5 |
-| Worker rules | 9 | 9 |
-| Hardening rules | 5 | 5 |
-| **Total production sources (`src/`)** | **20** | **20** |
+| Worker rules | 16 | 16 |
+| Hardening rules | 6 | 6 |
+| **Total production sources (`src/`)** | **28** | **28** |
 
 ## Out of `src/` (documented in spec, not inventory rows)
 

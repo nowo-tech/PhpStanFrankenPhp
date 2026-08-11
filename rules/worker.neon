@@ -44,3 +44,31 @@ services:
         class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoSetErrorExceptionHandlerRule
         tags:
             - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoChdirRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoSetLocaleRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoLocaleSetDefaultRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoDateDefaultTimezoneSetRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoMbEncodingMutationRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoErrorReportingMutationRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoUmaskRule
+        tags:
+            - phpstan.rules.rule
