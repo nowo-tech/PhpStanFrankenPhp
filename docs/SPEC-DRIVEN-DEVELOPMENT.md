@@ -13,3 +13,7 @@ This package follows Nowo’s spec-driven pattern (REQ-DOCS-013).
 2. Keep `docs/RULES.md` as the human-facing rule catalog (normative for identifiers).
 3. Demos and RuleTestCase fixtures must stay aligned with the catalog.
 4. Prefer small PRs: one rule (or one level) per change when possible.
+
+## Spec Kit
+
+Use [SPEC-KIT.md](SPEC-KIT.md) with Cursor Agent (`specify` / `.specify/`) to keep `specs/001-baseline/` aligned with this workflow.

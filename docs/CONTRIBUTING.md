@@ -1,5 +1,9 @@
 # Contributing
 
+## Code of Conduct
+
+This project follows the [Contributor Covenant Code of Conduct](../CODE_OF_CONDUCT.md). By participating, you are expected to uphold it.
+
 ## Setup
 
 ```bash
@@ -31,3 +35,4 @@ make demo-classic-good demo-worker-good demo-hardening-good
 
 - Run `make setup-hooks` so `commit-msg` strips Cursor co-author trailers (REQ-GIT-001).
 - After commits that will be pushed: `make check-no-cursor-coauthor`.
+- If CI fails because trailers are already on the remote, run `make strip-cursor-coauthor-from-history` before `git push --force-with-lease`. See [GITHUB_CI.md](GITHUB_CI.md).
