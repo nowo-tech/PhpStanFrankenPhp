@@ -9,6 +9,10 @@
 2. Read [CHANGELOG.md](CHANGELOG.md) for the target version.
 3. Re-run PHPStan with your chosen rulesets and the package demos if you maintain local forks of fixtures.
 
+## Upgrading to 1.1.1
+
+No application upgrade steps. **Demos only:** Hot Reload Bundle `^1.4` (FrankenPHP Mercure/`hot_reload`, `dev`/`test`). Continue requiring `nowo-tech/phpstan-frankenphp` as before.
+
 ## Upgrading to 1.1.0
 
 **New rules** land in existing `ruleset-worker.neon` / `ruleset-hardening.neon`. If you already enable those rulesets, expect **new PHPStan findings** until you remediate or baseline them.

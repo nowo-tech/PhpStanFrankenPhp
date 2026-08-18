@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.1.1] - 2026-08-18](#111-2026-08-18)
 - [[1.1.0] - 2026-08-11](#110-2026-08-11)
 - [[1.0.3] - 2026-08-03](#103-2026-08-03)
 - [[1.0.2] - 2026-07-29](#102-2026-07-29)
@@ -16,6 +17,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-08-18
+
+### Changed
+
+- **Demos:** pin `nowo-tech/hot-reload-bundle` to `^1.4` with FrankenPHP Mercure/`hot_reload` (`dev`/`test` only).
+
+[1.1.1]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.1.1
 ## [1.1.0] - 2026-08-11
 
 ### Added
@@ -95,7 +103,7 @@ First stable release of `nowo-tech/phpstan-frankenphp`: PHPStan rules to migrate
 - `NoSuperglobalAccessRule` defaults to `$_ENV` + `$_SESSION` only (aligned with FrankenPHP worker reset behaviour); request superglobals are opt-in via worker-strict / `flagRequestSuperglobals`.
 - Mutable static guidance no longer recommends invalid `readonly static` properties.
 
-[Unreleased]: https://github.com/nowo-tech/PhpStanFrankenPhp/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/nowo-tech/PhpStanFrankenPhp/compare/v1.1.1...HEAD
 [1.1.0]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.1.0
 [1.0.3]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.0.3
 [1.0.2]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.0.2
