@@ -9,6 +9,14 @@
 2. Read [CHANGELOG.md](CHANGELOG.md) for the target version.
 3. Re-run PHPStan with your chosen rulesets and the package demos if you maintain local forks of fixtures.
 
+## Upgrading to 1.1.2
+
+No application upgrade steps.
+
+```bash
+composer update nowo-tech/phpstan-frankenphp
+```
+
 ## Upgrading to 1.1.1
 
 No application upgrade steps. **Demos only:** Hot Reload Bundle `^1.4` (FrankenPHP Mercure/`hot_reload`, `dev`/`test`). Continue requiring `nowo-tech/phpstan-frankenphp` as before.
