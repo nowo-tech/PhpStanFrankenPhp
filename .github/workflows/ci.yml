@@ -62,6 +62,9 @@ jobs:
         run: |
           composer config --unset platform.php
           composer update --with-all-dependencies --no-interaction --prefer-dist --no-progress
+      - name: Composer audit (Critical/High)
+        run: composer audit --locked
+
 
       - name: Run tests
         run: composer test
