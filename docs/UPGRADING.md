@@ -1,5 +1,27 @@
 # Upgrading
 
+## Table of contents
+
+- [From 1.1.2 to 1.1.3](#from-112-to-113)
+
+## From 1.1.2 to 1.1.3
+
+Review the [CHANGELOG](CHANGELOG.md) entry. PHP **8.2+** may now be required.
+
+```bash
+composer update nowo-tech/phpstan-frankenphp
+```
+
+## From 1.1.2 to 1.1.3
+
+Review the [CHANGELOG](CHANGELOG.md) entry. PHP **8.2+** may now be required.
+
+```bash
+composer update nowo-tech/phpstan-frankenphp
+```
+
+# Upgrading
+
 ## General process
 
 1. Update the package:
