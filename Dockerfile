@@ -13,6 +13,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /app
 
 COPY composer.json composer.lock* ./
+# classmap-dev references tests/Fixtures before full COPY
+RUN mkdir -p tests/Fixtures
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts || composer install --no-interaction --prefer-dist --no-scripts
 
 COPY . .
