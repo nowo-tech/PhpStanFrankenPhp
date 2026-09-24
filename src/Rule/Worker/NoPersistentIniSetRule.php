@@ -29,6 +29,7 @@ final class NoPersistentIniSetRule implements Rule
         'error_reporting',
         'display_errors',
         'default_socket_timeout',
+        'default_charset',
         'auto_detect_line_endings',
         'precision',
         'serialize_precision',
@@ -37,6 +38,12 @@ final class NoPersistentIniSetRule implements Rule
         'session.save_path',
         'session.name',
         'session.gc_maxlifetime',
+        'mbstring.internal_encoding',
+        'mbstring.http_output',
+        'mbstring.language',
+        'mbstring.detect_order',
+        'mbstring.substitute_character',
+        'intl.default_locale',
     ];
 
     public function getNodeType(): string

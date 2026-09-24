@@ -12,5 +12,7 @@ final class NoMbEncodingMutation
         mb_regex_encoding('UTF-8'); // error
         mb_http_output('UTF-8'); // error
         mb_language('uni'); // error
+        mb_detect_order(['UTF-8']); // error
+        mb_substitute_character(0x3f); // error
     }
 }

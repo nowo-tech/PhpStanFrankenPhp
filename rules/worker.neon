@@ -4,6 +4,8 @@ parameters:
         # When true, also flag $_GET/$_POST/$_COOKIE/$_FILES/$_REQUEST/$_SERVER.
         # Default false: FrankenPHP resets those between requests; $_ENV/$_SESSION stay flagged.
         flagRequestSuperglobals: false
+        # When true, flag classes that mutate $this->… without ResetInterface (kernel reuse).
+        flagMissingResetInterface: false
 
 services:
     -
@@ -70,5 +72,11 @@ services:
             - phpstan.rules.rule
     -
         class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoUmaskRule
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoMissingResetInterfaceRule
+        arguments:
+            enabled: %frankenphp.flagMissingResetInterface%
         tags:
             - phpstan.rules.rule

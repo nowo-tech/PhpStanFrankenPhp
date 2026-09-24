@@ -66,6 +66,7 @@ FrankenPHP classic already changes process lifetime compared to FPM (`exit`/`die
 | 1 | [`ruleset-classic.neon`](ruleset-classic.neon) | Moving FPM → FrankenPHP **classic** |
 | 2 | [`ruleset-worker.neon`](ruleset-worker.neon) | Enabling FrankenPHP **worker** |
 | 2b | [`ruleset-worker-strict.neon`](ruleset-worker-strict.neon) | Optional: also flag `$_GET`/`$_POST`/… |
+| 2c | [`ruleset-worker-no-kernel-reset.neon`](ruleset-worker-no-kernel-reset.neon) | Recommended when `FRANKENPHP_RESET_KERNEL` unset/false |
 | 3 | [`ruleset-hardening.neon`](ruleset-hardening.neon) | Production hardening (timeouts, fork, sleep) |
 
 Full catalog: [docs/RULES.md](docs/RULES.md).
@@ -112,6 +113,7 @@ make demo-all
 - [Changelog](docs/CHANGELOG.md)
 - [Upgrading](docs/UPGRADING.md)
 - [Roadmap](docs/ROADMAP.md)
+- [Worker audit (`FRANKENPHP_RESET_KERNEL` unset/false)](docs/FRANKENPHP-WORKER-AUDIT.md)
 - [Release](docs/RELEASE.md)
 - [Security](docs/SECURITY.md)
 - [Engram](docs/ENGRAM.md)

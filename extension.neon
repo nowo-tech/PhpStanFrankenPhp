@@ -15,10 +15,12 @@
 parametersSchema:
     frankenphp: structure([
         flagRequestSuperglobals: bool()
+        flagMissingResetInterface: bool()
     ])
 
 parameters:
     frankenphp:
         flagRequestSuperglobals: false
+        flagMissingResetInterface: false
 
 services: []

@@ -12,6 +12,7 @@ use NowoTech\PhpStanFrankenPhp\Rule\Classic\NoUnlimitedIoTimeoutRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoBlockingSleepRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoPcntlForkRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoPcntlSignalRule;
+use NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoPosixProcessControlRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoRegisterTickFunctionRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoUnlimitedExecutionTimeRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoUnlimitedMemoryRule;
@@ -21,6 +22,7 @@ use NowoTech\PhpStanFrankenPhp\Rule\Worker\NoErrorReportingMutationRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Worker\NoGlobalStateWriteRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Worker\NoLocaleSetDefaultRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Worker\NoMbEncodingMutationRule;
+use NowoTech\PhpStanFrankenPhp\Rule\Worker\NoMissingResetInterfaceRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Worker\NoMutableStaticPropertyRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Worker\NoNativeSessionApiRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Worker\NoPersistentIniSetRule;
@@ -71,10 +73,12 @@ final class CoverageCompletenessTest extends TestCase
         yield 'mbEncoding' => [new NoMbEncodingMutationRule()];
         yield 'errorReporting' => [new NoErrorReportingMutationRule()];
         yield 'umask' => [new NoUmaskRule()];
+        yield 'missingReset' => [new NoMissingResetInterfaceRule(true)];
         yield 'time' => [new NoUnlimitedExecutionTimeRule()];
         yield 'memory' => [new NoUnlimitedMemoryRule()];
         yield 'fork' => [new NoPcntlForkRule()];
         yield 'signal' => [new NoPcntlSignalRule()];
+        yield 'posix' => [new NoPosixProcessControlRule()];
         yield 'sleep' => [new NoBlockingSleepRule()];
         yield 'tick' => [new NoRegisterTickFunctionRule()];
     }
@@ -105,6 +109,8 @@ final class CoverageCompletenessTest extends TestCase
         self::assertTrue(NodeHelper::isZeroLikeLiteral(new DNumber(0.0)));
         self::assertTrue(NodeHelper::isZeroLikeLiteral(new String_('0')));
         self::assertTrue(NodeHelper::isZeroLikeLiteral(new ConstFetch(new Name('null'))));
+        self::assertTrue(NodeHelper::isNullLiteral(new ConstFetch(new Name('null'))));
+        self::assertFalse(NodeHelper::isNullLiteral(new LNumber(0)));
         self::assertFalse(NodeHelper::isZeroLikeLiteral(new LNumber(1)));
         self::assertFalse(NodeHelper::isZeroLikeLiteral(new String_('x')));
         self::assertFalse(NodeHelper::isZeroLikeLiteral(new Variable('n')));

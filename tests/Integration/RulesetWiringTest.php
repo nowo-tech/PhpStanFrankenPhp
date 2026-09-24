@@ -17,6 +17,7 @@ final class RulesetWiringTest extends TestCase
         yield 'classic' => ['ruleset-classic.neon'];
         yield 'worker' => ['ruleset-worker.neon'];
         yield 'worker-strict' => ['ruleset-worker-strict.neon'];
+        yield 'worker-no-kernel-reset' => ['ruleset-worker-no-kernel-reset.neon'];
         yield 'hardening' => ['ruleset-hardening.neon'];
         yield 'all' => ['rules.neon'];
         yield 'rules/classic' => ['rules/classic.neon'];
@@ -48,13 +49,16 @@ final class RulesetWiringTest extends TestCase
         self::assertStringContainsString('NoMbEncodingMutationRule', $contents);
         self::assertStringContainsString('NoErrorReportingMutationRule', $contents);
         self::assertStringContainsString('NoUmaskRule', $contents);
+        self::assertStringContainsString('NoMissingResetInterfaceRule', $contents);
         self::assertStringContainsString('flagRequestSuperglobals', $contents);
+        self::assertStringContainsString('flagMissingResetInterface', $contents);
     }
 
     public function testHardeningRulesetRegistersPcntlSignal(): void
     {
         $contents = (string) file_get_contents(\dirname(__DIR__, 2).'/rules/hardening.neon');
         self::assertStringContainsString('NoPcntlSignalRule', $contents);
+        self::assertStringContainsString('NoPosixProcessControlRule', $contents);
     }
 
     public function testExtensionDeclaresParameterSchema(): void
@@ -62,5 +66,12 @@ final class RulesetWiringTest extends TestCase
         $contents = (string) file_get_contents(\dirname(__DIR__, 2).'/extension.neon');
         self::assertStringContainsString('parametersSchema', $contents);
         self::assertStringContainsString('flagRequestSuperglobals', $contents);
+        self::assertStringContainsString('flagMissingResetInterface', $contents);
+    }
+
+    public function testWorkerNoKernelResetRulesetEnablesMissingResetInterface(): void
+    {
+        $contents = (string) file_get_contents(\dirname(__DIR__, 2).'/ruleset-worker-no-kernel-reset.neon');
+        self::assertStringContainsString('flagMissingResetInterface: true', $contents);
     }
 }

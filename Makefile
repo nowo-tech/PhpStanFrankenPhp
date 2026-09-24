@@ -17,7 +17,8 @@ SERVICE_PHP ?= php
 	cs-check cs-fix rector rector-dry phpstan qa release-check release-check-demos \
 	composer-sync clean update validate setup-hooks \
 	demo-classic demo-worker demo-hardening demo-all \
-	demo-classic-good demo-worker-good demo-hardening-good demo-worker-strict
+	demo-classic-good demo-worker-good demo-hardening-good demo-worker-strict \
+	demo-worker-no-kernel-reset demo-worker-no-kernel-reset-good
 
 help:
 	@echo "PhpStanFrankenPhp — make targets"
@@ -109,6 +110,13 @@ demo-worker-good: ensure-up
 demo-worker-strict: ensure-up
 	@$(COMPOSE) exec -T $(SERVICE_PHP) composer demo-worker-strict || true
 
+demo-worker-no-kernel-reset: ensure-up
+	@echo "=== Worker no-kernel-reset demos (expect findings) ==="
+	@$(COMPOSE) exec -T $(SERVICE_PHP) composer demo-worker-no-kernel-reset || true
+
+demo-worker-no-kernel-reset-good: ensure-up
+	@$(COMPOSE) exec -T $(SERVICE_PHP) composer demo-worker-no-kernel-reset-good
+
 demo-hardening-good: ensure-up
 	@$(COMPOSE) exec -T $(SERVICE_PHP) composer demo-hardening-good
 
@@ -130,10 +138,12 @@ release-check-demos:
 	@if $(COMPOSE) exec -T $(SERVICE_PHP) composer demo-classic; then echo "Expected findings on demo/classic/bad" >&2; exit 1; fi
 	@if $(COMPOSE) exec -T $(SERVICE_PHP) composer demo-worker; then echo "Expected findings on demo/worker/bad" >&2; exit 1; fi
 	@if $(COMPOSE) exec -T $(SERVICE_PHP) composer demo-hardening; then echo "Expected findings on demo/hardening/bad" >&2; exit 1; fi
+	@if $(COMPOSE) exec -T $(SERVICE_PHP) composer demo-worker-no-kernel-reset; then echo "Expected findings on no-kernel-reset demos" >&2; exit 1; fi
 	@echo "=== Fixture demos: good samples must be clean ==="
 	@$(COMPOSE) exec -T $(SERVICE_PHP) composer demo-classic-good
 	@$(COMPOSE) exec -T $(SERVICE_PHP) composer demo-worker-good
 	@$(COMPOSE) exec -T $(SERVICE_PHP) composer demo-hardening-good
+	@$(COMPOSE) exec -T $(SERVICE_PHP) composer demo-worker-no-kernel-reset-good
 	@echo "=== Symfony 8 FrankenPHP smoke ==="
 	@$(MAKE) -C demo release-check
 

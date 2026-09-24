@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace NowoTech\PhpStanFrankenPhp\Support;
 
 use PhpParser\Node;
+use PhpParser\Node\Expr\ConstFetch;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Name;
 use PHPStan\Analyser\Scope;
@@ -64,7 +65,7 @@ final class NodeHelper
      */
     public static function isZeroLikeLiteral(Node\Expr $expr): bool
     {
-        if ($expr instanceof Node\Expr\ConstFetch) {
+        if ($expr instanceof ConstFetch) {
             return 'null' === strtolower($expr->name->toString());
         }
 
@@ -81,6 +82,14 @@ final class NodeHelper
         }
 
         return false;
+    }
+
+    /**
+     * Whether the expression is the bare `null` constant (PHP 8 nullable getter pattern).
+     */
+    public static function isNullLiteral(Node\Expr $expr): bool
+    {
+        return $expr instanceof ConstFetch && 'null' === strtolower($expr->name->toString());
     }
 
     public static function isInClass(Scope $scope): bool

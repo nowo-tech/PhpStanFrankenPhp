@@ -18,7 +18,10 @@ Apply rulesets in this order. Do not enable worker rules until classic findings 
 | 1 | `ruleset-classic.neon` | Survive the move off PHP-FPM onto FrankenPHP request/classic mode |
 | 2 | `ruleset-worker.neon` | Make application state safe when the process stays alive |
 | 2b (optional) | `ruleset-worker-strict.neon` | Also flag $_GET/$_POST/… (framework-only hygiene) |
+| 2c (recommended for kernel reuse) | `ruleset-worker-no-kernel-reset.neon` | Worker + missing `ResetInterface` when `FRANKENPHP_RESET_KERNEL` is unset/false |
 | 3 | `ruleset-hardening.neon` | Bound resources and remove thread-hostile APIs |
+
+**Target runtime:** FrankenPHP **worker** with **`FRANKENPHP_RESET_KERNEL` unset/false** (default): the Symfony kernel instance is reused; `services_resetter` still clears services that implement `ResetInterface`. Use step **2c** for that profile. Setting `FRANKENPHP_RESET_KERNEL=1` clones the kernel each request (slower) and is an escape hatch, not a substitute for fixing state.
 
 **FPM remains supported.** Remediations are portable application hygiene: they harden the app for FrankenPHP worker (and classic) without requiring FrankenPHP-specific APIs, and they continue to work under PHP-FPM. See [MIGRATION.md — FPM compatibility](MIGRATION.md#fpm-compatibility-important).
 
@@ -260,9 +263,9 @@ includes:
 
 ### `NoMbEncodingMutationRule` — `frankenphp.worker.noMbEncodingMutation`
 
-**Detects:** `mb_internal_encoding` / `mb_regex_encoding` / `mb_http_output` / `mb_language` **with an argument**.
+**Detects:** `mb_internal_encoding` / `mb_regex_encoding` / `mb_http_output` / `mb_language` / `mb_detect_order` / `mb_substitute_character` **with a non-null argument**.
 
-**Why:** mbstring defaults are process-wide. Calls without an argument (reads) are allowed.
+**Why:** mbstring defaults are process-wide. Calls without an argument, or with explicit `null` (PHP 8 getters), are allowed.
 
 **Fix:** Configure mbstring in php.ini / the image, or pass encodings explicitly to `mb_*` functions.
 
@@ -291,6 +294,20 @@ includes:
 **Fix:** Set umask in the process supervisor / container entrypoint, not per request.
 
 **Demo:** `demo/worker/bad/NoUmask.php` · good: `demo/worker/good/NoUmaskGood.php`
+
+---
+
+### `NoMissingResetInterfaceRule` — `frankenphp.worker.noMissingResetInterface`
+
+**Detects:** classes that assign to `$this->…` outside `__construct` / `reset` / lifecycle magic **without** implementing `Symfony\Contracts\Service\ResetInterface`.
+
+**Why:** With `FRANKENPHP_RESET_KERNEL` unset/false the kernel is reused; only services with `ResetInterface` (or `kernel.reset`) are cleared by `services_resetter`. Heuristic skips entities/DTOs/messages/tests by name.
+
+**Enable:** `frankenphp.flagMissingResetInterface: true` or include `ruleset-worker-no-kernel-reset.neon` (off by default).
+
+**Fix:** Implement `reset()`, keep the service stateless, or use request-scoped design.
+
+**Demo:** `demo/worker/bad/NoMissingResetInterface.php` · good: `demo/worker/good/NoMissingResetInterfaceGood.php`
 
 ---
 
@@ -365,6 +382,18 @@ includes:
 **Fix:** Handle signals in the supervisor / a dedicated process, not from application request code.
 
 **Demo:** `demo/hardening/bad/NoPcntlSignal.php` · good: `demo/hardening/good/NoPcntlSignalGood.php`
+
+---
+
+### `NoPosixProcessControlRule` — `frankenphp.hardening.noPosixProcessControl`
+
+**Detects:** `posix_kill`, `posix_setuid`, `posix_seteuid`, `posix_setgid`, `posix_setegid`, `posix_setpgid`, `posix_setsid`.
+
+**Why:** FrankenPHP/Caddy owns the OS process; uid/gid/signal mutations from request code are unsafe on a reused worker.
+
+**Fix:** Supervisor / dedicated CLI process, not application request handlers.
+
+**Demo:** `demo/hardening/bad/NoPosixProcessControl.php` · good: `demo/hardening/good/NoPosixProcessControlGood.php`
 
 ## Identifiers
 

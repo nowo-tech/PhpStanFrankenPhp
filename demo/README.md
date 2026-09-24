@@ -74,6 +74,7 @@ Overview sample: `SafeRequestHandler.php`.
 | `NoMbEncodingMutation.php` | `frankenphp.worker.noMbEncodingMutation` | `NoMbEncodingMutationGood.php` |
 | `NoErrorReportingMutation.php` | `frankenphp.worker.noErrorReportingMutation` | `NoErrorReportingMutationGood.php` |
 | `NoUmask.php` | `frankenphp.worker.noUmask` | `NoUmaskGood.php` |
+| `NoMissingResetInterface.php` | `frankenphp.worker.noMissingResetInterface` (via `ruleset-worker-no-kernel-reset.neon`) | `NoMissingResetInterfaceGood.php` |
 
 Overview sample: `RequestScopedService.php`.
 
@@ -87,6 +88,7 @@ Overview sample: `RequestScopedService.php`.
 | `NoBlockingSleep.php` | `frankenphp.hardening.noBlockingSleep` | `NoBlockingSleepGood.php` |
 | `NoRegisterTickFunction.php` | `frankenphp.hardening.noRegisterTickFunction` | `NoRegisterTickFunctionGood.php` |
 | `NoPcntlSignal.php` | `frankenphp.hardening.noPcntlSignal` | `NoPcntlSignalGood.php` |
+| `NoPosixProcessControl.php` | `frankenphp.hardening.noPosixProcessControl` | `NoPosixProcessControlGood.php` |
 
 Overview sample: `BoundedResources.php`.
 

@@ -74,6 +74,7 @@ As a platform engineer, I optionally enable **hardening** rules to block fork, u
 | FR-WRK-014 | `NoErrorReportingMutationRule` flags `error_reporting(...)` mutations |
 | FR-WRK-015 | `NoUmaskRule` flags `umask(...)` mutations |
 | FR-WRK-016 | `NoLocaleSetDefaultRule` flags `locale_set_default()` / `Locale::setDefault()` |
+| FR-WRK-017 | `NoMissingResetInterfaceRule` (opt-in) flags mutable `$this` state without `ResetInterface` |
 
 ### Hardening rules
 
@@ -85,6 +86,7 @@ As a platform engineer, I optionally enable **hardening** rules to block fork, u
 | FR-HRD-004 | `NoBlockingSleepRule` flags blocking `sleep`/`usleep` |
 | FR-HRD-005 | `NoRegisterTickFunctionRule` flags `register_tick_function` |
 | FR-HRD-006 | `NoPcntlSignalRule` flags pcntl signal APIs (`pcntl_signal`, `pcntl_sigprocmask`, `pcntl_alarm`, …) |
+| FR-HRD-007 | `NoPosixProcessControlRule` flags `posix_kill` / `posix_setuid` / … |
 
 ### Demos & tests
 
@@ -97,7 +99,7 @@ As a platform engineer, I optionally enable **hardening** rules to block fork, u
 
 ## Success Criteria
 
-- **SC-001**: **28/28** production PHP files under `src/` mapped in [`code-inventory.md`](code-inventory.md).
+- **SC-001**: **30/30** production PHP files under `src/` mapped in [`code-inventory.md`](code-inventory.md).
 - **SC-002**: `composer test` passes; `composer demo-*-good` reports zero errors; bad demos fail as expected.
 - **SC-003**: `docs/RULES.md` lists every shipped rule with identifier and justification.
 

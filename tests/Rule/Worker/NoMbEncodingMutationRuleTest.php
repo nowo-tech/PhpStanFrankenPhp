@@ -27,6 +27,8 @@ final class NoMbEncodingMutationRuleTest extends AbstractRuleTestCase
             ['mb_regex_encoding()'.$suffix, 12],
             ['mb_http_output()'.$suffix, 13],
             ['mb_language()'.$suffix, 14],
+            ['mb_detect_order()'.$suffix, 15],
+            ['mb_substitute_character()'.$suffix, 16],
         ]);
     }
 }

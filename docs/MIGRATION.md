@@ -28,15 +28,18 @@ Caveat: you may **stop using FPM-only APIs** (notably `fastcgi_finish_request()`
 2. Enable **`ruleset-classic.neon`** in PHPStan CI. Fix `exit`/`die`, FastCGI APIs, `putenv`, unbounded I/O.
 3. Smoke-test under load; confirm no process-killing paths remain.
 4. Enable **`ruleset-worker.neon`**. Fix statics, globals, process-state APIs (`chdir`, `setlocale`, `locale_set_default` / `Locale::setDefault`, timezone/mbstring/`error_reporting`/`umask` mutations), superglobals, singletons, native sessions, sticky `ini_set`.
-5. Switch `FRANKENPHP_MODE=worker` in a staging environment.
-6. Enable **`ruleset-hardening.neon`**. Align PHP timeouts with Caddy/FrankenPHP (REQ-RUNTIME-001).
-7. Set worker `max_requests` as a safety net for residual leaks.
+5. For the default **kernel-reuse** profile (`FRANKENPHP_RESET_KERNEL` unset/false), also enable **`ruleset-worker-no-kernel-reset.neon`** and implement `ResetInterface` on shared services that keep request data.
+6. Switch `FRANKENPHP_MODE=worker` in a staging environment.
+7. Enable **`ruleset-hardening.neon`**. Align PHP timeouts with Caddy/FrankenPHP (REQ-RUNTIME-001).
+8. Set worker `max_requests` as a safety net for residual leaks.
 
 ## Symfony notes
 
-- Services that cache request data should implement `Symfony\Contracts\Service\ResetInterface` (or be tagged `kernel.reset`).
+- **Default worker profile:** leave `FRANKENPHP_RESET_KERNEL` unset/false so the kernel is reused (best throughput). Enable **`ruleset-worker-no-kernel-reset.neon`** so PHPStan flags shared services that mutate instance state without `ResetInterface`.
+- Services that cache request data **must** implement `Symfony\Contracts\Service\ResetInterface` (or be tagged `kernel.reset`). `services_resetter` still runs when the kernel is not cloned.
 - Prefer `Request $request` injection over `$_GET` / `$_SERVER`.
 - Use `runtime/frankenphp-symfony` (or native Symfony FrankenPHP support on recent versions) for the worker loop.
+- Escape hatch only: `FRANKENPHP_RESET_KERNEL=1` clones the kernel each request (~large throughput cost). Prefer fixing state over relying on this.
 
 ## Laravel notes
 

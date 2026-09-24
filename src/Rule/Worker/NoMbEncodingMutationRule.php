@@ -13,9 +13,10 @@ use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
 
 /**
- * Level 2 (worker) — flags mb_* encoding setters that stick on the worker.
+ * Level 2 (worker) — flags mb_* setters that stick on the worker.
  *
- * Calls without an encoding argument only read the current value and are allowed.
+ * Calls without an argument, or with an explicit `null` argument (PHP 8 getters),
+ * only read the current value and are allowed.
  *
  * @implements Rule<FuncCall>
  */
@@ -26,6 +27,8 @@ final class NoMbEncodingMutationRule implements Rule
         'mb_regex_encoding',
         'mb_http_output',
         'mb_language',
+        'mb_detect_order',
+        'mb_substitute_character',
     ];
 
     public function getNodeType(): string
@@ -39,7 +42,8 @@ final class NoMbEncodingMutationRule implements Rule
             return [];
         }
 
-        if (!NodeHelper::firstArgExpr($node) instanceof Expr) {
+        $first = NodeHelper::firstArgExpr($node);
+        if (!$first instanceof Expr || NodeHelper::isNullLiteral($first)) {
             return [];
         }
 

@@ -95,7 +95,9 @@
         "demo-classic-good": "phpstan analyse -c demo/phpstan-classic-good.neon --memory-limit=512M",
         "demo-worker-good": "phpstan analyse -c demo/phpstan-worker-good.neon --memory-limit=512M",
         "demo-hardening-good": "phpstan analyse -c demo/phpstan-hardening-good.neon --memory-limit=512M",
-        "demo-worker-strict": "phpstan analyse -c demo/phpstan-worker-strict.neon --memory-limit=512M --error-format=table"
+        "demo-worker-strict": "phpstan analyse -c demo/phpstan-worker-strict.neon --memory-limit=512M --error-format=table",
+        "demo-worker-no-kernel-reset": "phpstan analyse -c demo/phpstan-worker-no-kernel-reset.neon --memory-limit=512M --error-format=table",
+        "demo-worker-no-kernel-reset-good": "phpstan analyse -c demo/phpstan-worker-no-kernel-reset-good.neon --memory-limit=512M"
     },
     "scripts-descriptions": {
         "test": "Run PHPUnit tests",
@@ -115,7 +117,9 @@
         "demo-classic-good": "Analyse compliant classic demos (must be clean)",
         "demo-worker-good": "Analyse compliant worker demos (must be clean)",
         "demo-hardening-good": "Analyse compliant hardening demos (must be clean)",
-        "demo-worker-strict": "Analyse demos with worker-strict ruleset (also flags $_GET/$_POST/…)"
+        "demo-worker-strict": "Analyse demos with worker-strict ruleset (also flags $_GET/$_POST/…)",
+        "demo-worker-no-kernel-reset": "Analyse demos for worker + missing ResetInterface (FRANKENPHP_RESET_KERNEL unset/false)",
+        "demo-worker-no-kernel-reset-good": "Analyse compliant ResetInterface demos (must be clean)"
     },
     "config": {
         "sort-packages": true,

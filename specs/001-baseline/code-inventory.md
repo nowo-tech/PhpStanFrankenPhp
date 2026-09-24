@@ -2,7 +2,7 @@
 
 **Baseline spec**: [`spec.md`](spec.md)  
 **Package**: `nowo-tech/phpstan-frankenphp`  
-**Last audited**: 2026-08-10
+**Last audited**: 2026-09-24
 
 Every production PHP file under `src/` is mapped below. Tests under `tests/` and demo fixtures under `demo/` are validated separately (see spec acceptance criteria).
 
@@ -42,6 +42,7 @@ Every production PHP file under `src/` is mapped below. Tests under `tests/` and
 | `Rule/Worker/NoMbEncodingMutationRule.php` | Worker — no mbstring encoding/language mutation | FR-WRK-013 |
 | `Rule/Worker/NoErrorReportingMutationRule.php` | Worker — no error_reporting mutation | FR-WRK-014 |
 | `Rule/Worker/NoUmaskRule.php` | Worker — no umask mutation | FR-WRK-015 |
+| `Rule/Worker/NoMissingResetInterfaceRule.php` | Worker — missing ResetInterface (opt-in) | FR-WRK-017 |
 
 ## Hardening rules (`src/Rule/Hardening`)
 
@@ -53,6 +54,7 @@ Every production PHP file under `src/` is mapped below. Tests under `tests/` and
 | `Rule/Hardening/NoBlockingSleepRule.php` | Hardening — no blocking sleep | FR-HRD-004 |
 | `Rule/Hardening/NoRegisterTickFunctionRule.php` | Hardening — no register_tick_function | FR-HRD-005 |
 | `Rule/Hardening/NoPcntlSignalRule.php` | Hardening — no pcntl signal APIs | FR-HRD-006 |
+| `Rule/Hardening/NoPosixProcessControlRule.php` | Hardening — no posix process control | FR-HRD-007 |
 
 ## Coverage summary
 
@@ -60,9 +62,9 @@ Every production PHP file under `src/` is mapped below. Tests under `tests/` and
 | --- | ---: | ---: |
 | Support utilities | 1 | 1 |
 | Classic rules | 5 | 5 |
-| Worker rules | 16 | 16 |
-| Hardening rules | 6 | 6 |
-| **Total production sources (`src/`)** | **28** | **28** |
+| Worker rules | 17 | 17 |
+| Hardening rules | 7 | 7 |
+| **Total production sources (`src/`)** | **30** | **30** |
 
 ## Out of `src/` (documented in spec, not inventory rows)
 

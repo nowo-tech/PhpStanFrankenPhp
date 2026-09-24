@@ -11,6 +11,7 @@ use NowoTech\PhpStanFrankenPhp\Rule\Classic\NoUnlimitedIoTimeoutRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoBlockingSleepRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoPcntlForkRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoPcntlSignalRule;
+use NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoPosixProcessControlRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoRegisterTickFunctionRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoUnlimitedExecutionTimeRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoUnlimitedMemoryRule;
@@ -20,6 +21,7 @@ use NowoTech\PhpStanFrankenPhp\Rule\Worker\NoErrorReportingMutationRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Worker\NoGlobalStateWriteRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Worker\NoLocaleSetDefaultRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Worker\NoMbEncodingMutationRule;
+use NowoTech\PhpStanFrankenPhp\Rule\Worker\NoMissingResetInterfaceRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Worker\NoMutableStaticPropertyRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Worker\NoNativeSessionApiRule;
 use NowoTech\PhpStanFrankenPhp\Rule\Worker\NoPersistentIniSetRule;
@@ -34,14 +36,21 @@ use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Expr\ArrayDimFetch;
 use PhpParser\Node\Expr\ArrayItem;
 use PhpParser\Node\Expr\Assign;
+use PhpParser\Node\Expr\AssignOp\Plus;
 use PhpParser\Node\Expr\ConstFetch;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\MethodCall;
+use PhpParser\Node\Expr\PreInc;
+use PhpParser\Node\Expr\PropertyFetch;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Name;
 use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Scalar\String_;
+use PhpParser\Node\Stmt\Class_;
+use PhpParser\Node\Stmt\ClassMethod;
+use PhpParser\Node\Stmt\Expression;
+use PhpParser\Node\Stmt\If_;
 use PhpParser\Node\Stmt\Nop;
 use PHPStan\Analyser\Scope;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -143,12 +152,30 @@ final class DirectProcessNodeCoverageTest extends TestCase
         self::assertSame([], (new NoBlockingSleepRule())->processNode($wrong, $this->scope));
         self::assertSame([], (new NoPcntlForkRule())->processNode($wrong, $this->scope));
         self::assertSame([], (new NoPcntlSignalRule())->processNode($wrong, $this->scope));
+        self::assertSame([], (new NoPosixProcessControlRule())->processNode($wrong, $this->scope));
+        self::assertSame([], (new NoMissingResetInterfaceRule(false))->processNode(new Nop(), $this->scope));
+        self::assertSame([], (new NoMissingResetInterfaceRule(false))->processNode(
+            new Class_('Disabled'),
+            $this->scope
+        ));
+
+        $abstractMethod = new ClassMethod('compute');
+        $abstractMethod->stmts = null;
+        $named = new Class_('NoStmtsMutator', [
+            'stmts' => [$abstractMethod],
+        ]);
+        $named->namespacedName = new Name(['DemoWorker', 'NoStmtsMutator']);
+        self::assertSame([], (new NoMissingResetInterfaceRule(true))->processNode($named, $this->scope));
+
         self::assertSame([], (new NoRegisterTickFunctionRule())->processNode($wrong, $this->scope));
         self::assertSame([], (new NoUnlimitedExecutionTimeRule())->processNode($wrong, $this->scope));
         self::assertSame([], (new NoUnlimitedMemoryRule())->processNode($wrong, $this->scope));
 
         $mbRead = new FuncCall(new Name('mb_internal_encoding'), []);
         self::assertSame([], (new NoMbEncodingMutationRule())->processNode($mbRead, $this->scope));
+
+        $mbNullRead = new FuncCall(new Name('mb_internal_encoding'), [new Arg(new ConstFetch(new Name('null')))]);
+        self::assertSame([], (new NoMbEncodingMutationRule())->processNode($mbNullRead, $this->scope));
 
         $errorReportingRead = new FuncCall(new Name('error_reporting'), []);
         self::assertSame([], (new NoErrorReportingMutationRule())->processNode($errorReportingRead, $this->scope));
@@ -198,7 +225,19 @@ final class DirectProcessNodeCoverageTest extends TestCase
         self::assertSame([], (new NoSuperglobalAccessRule())->processNode(new Variable('foo'), $this->scope));
         self::assertSame([], (new NoSuperglobalAccessRule())->processNode(new Nop(), $this->scope));
 
-        // Force false branch of isGlobalsWrite recursion end
+        // Cover Assign / AssignOp / array-stmt recursion on MissingResetInterface helper paths.
+        $rule = new NoMissingResetInterfaceRule(true);
+        $ref = new \ReflectionMethod(NoMissingResetInterfaceRule::class, 'nodeWritesThisProperty');
+        $thisProp = new PropertyFetch(new Variable('this'), new Identifier('n'));
+        self::assertTrue($ref->invoke($rule, new Assign($thisProp, new LNumber(1))));
+        self::assertTrue($ref->invoke($rule, new Plus($thisProp, new LNumber(1))));
+        self::assertFalse($ref->invoke($rule, new Assign(new Variable('x'), new LNumber(1))));
+        self::assertFalse($ref->invoke($rule, new PreInc(new Variable('y'))));
+        $if = new If_(new ConstFetch(new Name('true')), [
+            'stmts' => [new Expression(new Assign($thisProp, new LNumber(2)))],
+        ]);
+        self::assertTrue($ref->invoke($rule, $if));
+
         $nested = new Assign(
             new ArrayDimFetch(new Variable('notGlobals'), new String_('a')),
             new LNumber(1)

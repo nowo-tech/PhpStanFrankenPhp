@@ -24,3 +24,7 @@ services:
         class: NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoPcntlSignalRule
         tags:
             - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Hardening\NoPosixProcessControlRule
+        tags:
+            - phpstan.rules.rule

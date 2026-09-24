@@ -1,0 +1,9 @@
+# Target: FrankenPHP worker with FRANKENPHP_RESET_KERNEL unset/false (default).
+# Kernel instance is reused; services_resetter still runs for ResetInterface.
+# Enables missing-ResetInterface detection on top of default worker rules.
+includes:
+    - ruleset-worker.neon
+
+parameters:
+    frankenphp:
+        flagMissingResetInterface: true
