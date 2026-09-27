@@ -22,7 +22,7 @@
     },
     "authors": [
         {
-            "name": "Héctor Franco Aceituno",
+            "name": "H\u00e9ctor Franco Aceituno",
             "email": "hectorfranco@nowo.tech",
             "homepage": "https://github.com/HecFranco",
             "role": "Developer"
@@ -38,6 +38,7 @@
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.0",
+        "igor-php/igor-php": "^0.9.7",
         "phpstan/phpstan-phpunit": "^2.0",
         "phpstan/phpstan-strict-rules": "^2.0",
         "phpunit/phpunit": "^10.0 || ^11.0",
@@ -97,7 +98,8 @@
         "demo-hardening-good": "phpstan analyse -c demo/phpstan-hardening-good.neon --memory-limit=512M",
         "demo-worker-strict": "phpstan analyse -c demo/phpstan-worker-strict.neon --memory-limit=512M --error-format=table",
         "demo-worker-no-kernel-reset": "phpstan analyse -c demo/phpstan-worker-no-kernel-reset.neon --memory-limit=512M --error-format=table",
-        "demo-worker-no-kernel-reset-good": "phpstan analyse -c demo/phpstan-worker-no-kernel-reset-good.neon --memory-limit=512M"
+        "demo-worker-no-kernel-reset-good": "phpstan analyse -c demo/phpstan-worker-no-kernel-reset-good.neon --memory-limit=512M",
+        "igor": "igor-php --no-agent ."
     },
     "scripts-descriptions": {
         "test": "Run PHPUnit tests",
@@ -109,7 +111,7 @@
         "rector": "Apply Rector refactors",
         "rector-dry": "Run Rector in dry-run mode",
         "phpstan": "Run PHPStan static analysis on the package itself",
-        "demo-classic": "Analyse demo fixtures for classic (FPM → FrankenPHP classic) rules",
+        "demo-classic": "Analyse demo fixtures for classic (FPM \u2192 FrankenPHP classic) rules",
         "demo-worker": "Analyse demo fixtures for worker rules",
         "demo-hardening": "Analyse demo fixtures for hardening rules",
         "demo-all": "Run all demo analyses (expect findings on intentional violations)",
@@ -117,9 +119,10 @@
         "demo-classic-good": "Analyse compliant classic demos (must be clean)",
         "demo-worker-good": "Analyse compliant worker demos (must be clean)",
         "demo-hardening-good": "Analyse compliant hardening demos (must be clean)",
-        "demo-worker-strict": "Analyse demos with worker-strict ruleset (also flags $_GET/$_POST/…)",
+        "demo-worker-strict": "Analyse demos with worker-strict ruleset (also flags $_GET/$_POST/\u2026)",
         "demo-worker-no-kernel-reset": "Analyse demos for worker + missing ResetInterface (FRANKENPHP_RESET_KERNEL unset/false)",
-        "demo-worker-no-kernel-reset-good": "Analyse compliant ResetInterface demos (must be clean)"
+        "demo-worker-no-kernel-reset-good": "Analyse compliant ResetInterface demos (must be clean)",
+        "igor": "Run Igor FrankenPHP worker-state audit (REQ-CS-008)"
     },
     "config": {
         "sort-packages": true,

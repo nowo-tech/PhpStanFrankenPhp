@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.2.1] - 2026-09-27](#121-2026-09-27)
 - [[1.2.0] - 2026-09-24](#120-2026-09-24)
 - [[1.1.3] - 2026-08-24](#113-2026-08-24)
 - [[1.1.2] - 2026-08-19](#112-2026-08-19)
@@ -19,6 +20,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [[1.0.0] - 2026-07-22](#100-2026-07-22)
 
 ## [Unreleased]
+
+## [1.2.1] - 2026-09-27
+
+### Added
+
+- **REQ-CS-008:** `igor-php/igor-php` (require-dev only), root `igor.json`, Composer/`Makefile` `igor` target, and `release-check` wiring for FrankenPHP worker-state audit.
+
+[1.2.1]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.2.1
 
 ## [1.2.0] - 2026-09-24
 
