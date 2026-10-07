@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace NowoTech\PhpStanFrankenPhp\Rule\Worker;
 
 use PhpParser\Node;
+use PhpParser\Node\Expr\ArrayDimFetch;
 use PhpParser\Node\Expr\Assign;
 use PhpParser\Node\Expr\AssignOp;
+use PhpParser\Node\Expr\AssignRef;
 use PhpParser\Node\Expr\PostDec;
 use PhpParser\Node\Expr\PostInc;
 use PhpParser\Node\Expr\PreDec;
@@ -17,6 +19,7 @@ use PhpParser\Node\Identifier;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
+use PhpParser\Node\Stmt\Unset_;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
@@ -24,6 +27,10 @@ use PHPStan\Rules\RuleErrorBuilder;
 /**
  * Level 2 (worker, opt-in) — flags classes that mutate `$this->…` outside
  * construct/reset without implementing Symfony ResetInterface.
+ *
+ * A write is any assignment (`=`, `=&`, `+=`, `??=`, …), increment/decrement or
+ * `unset()` whose target is `$this->prop`, an element of it (`$this->items[$k]`,
+ * `$this->items[]`) or a nested property (`$this->obj->prop`).
  *
  * Targets FrankenPHP worker with FRANKENPHP_RESET_KERNEL unset/false: the kernel
  * instance is reused; only services that implement ResetInterface (or are tagged
@@ -180,14 +187,24 @@ final class NoMissingResetInterfaceRule implements Rule
 
     private function nodeWritesThisProperty(Node $node): bool
     {
-        if (($node instanceof Assign || $node instanceof AssignOp) && $this->isThisProperty($node->var)) {
+        if (($node instanceof Assign || $node instanceof AssignRef || $node instanceof AssignOp)
+            && $this->targetsThisProperty($node->var)
+        ) {
             return true;
         }
 
         if (($node instanceof PreInc || $node instanceof PostInc || $node instanceof PreDec || $node instanceof PostDec)
-            && $this->isThisProperty($node->var)
+            && $this->targetsThisProperty($node->var)
         ) {
             return true;
+        }
+
+        if ($node instanceof Unset_) {
+            foreach ($node->vars as $var) {
+                if ($this->targetsThisProperty($var)) {
+                    return true;
+                }
+            }
         }
 
         foreach ($node->getSubNodeNames() as $name) {
@@ -202,6 +219,23 @@ final class NoMissingResetInterfaceRule implements Rule
                     }
                 }
             }
+        }
+
+        return false;
+    }
+
+    /**
+     * Unwraps the write target through `ArrayDimFetch` (`$this->items[$k]`) and
+     * `PropertyFetch` (`$this->obj->prop`) until the root `$this->prop` is reached.
+     */
+    private function targetsThisProperty(Node $node): bool
+    {
+        while ($node instanceof ArrayDimFetch || $node instanceof PropertyFetch) {
+            if ($this->isThisProperty($node)) {
+                return true;
+            }
+
+            $node = $node->var;
         }
 
         return false;

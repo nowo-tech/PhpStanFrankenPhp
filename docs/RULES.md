@@ -299,7 +299,7 @@ includes:
 
 ### `NoMissingResetInterfaceRule` — `frankenphp.worker.noMissingResetInterface`
 
-**Detects:** classes that assign to `$this->…` outside `__construct` / `reset` / lifecycle magic **without** implementing `Symfony\Contracts\Service\ResetInterface`.
+**Detects:** classes that write to `$this->…` outside `__construct` / `reset` / lifecycle magic **without** implementing `Symfony\Contracts\Service\ResetInterface`. A write is any assignment (`=`, `=&`, `+=`, `??=`, …), increment/decrement or `unset()` targeting the property itself, one of its array elements (`$this->items[$k] = …`, `$this->items[] = …`, `unset($this->items[$k])`) or a nested property (`$this->obj->prop = …`). Reads (`isset`, `foreach`, local copies) and method calls on the property (`$this->collection->add()`) are not reported.
 
 **Why:** With `FRANKENPHP_RESET_KERNEL` unset/false the kernel is reused; only services with `ResetInterface` (or `kernel.reset`) are cleared by `services_resetter`. Heuristic skips entities/DTOs/messages/tests by name.
 
@@ -307,7 +307,7 @@ includes:
 
 **Fix:** Implement `reset()`, keep the service stateless, or use request-scoped design.
 
-**Demo:** `demo/worker/bad/NoMissingResetInterface.php` · good: `demo/worker/good/NoMissingResetInterfaceGood.php`
+**Demo:** `demo/worker/bad/NoMissingResetInterface.php`, `demo/worker/bad/NoMissingResetInterfaceArrayWrite.php` · good: `demo/worker/good/NoMissingResetInterfaceGood.php`, `demo/worker/good/NoMissingResetInterfaceArrayWriteGood.php`
 
 ---
 
