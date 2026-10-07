@@ -151,6 +151,8 @@ final class DirectProcessNodeCoverageTest extends TestCase
         self::assertSame([], (new NoUmaskRule())->processNode($wrong, $this->scope));
         self::assertSame([], (new NoBlockingSleepRule())->processNode($wrong, $this->scope));
         self::assertSame([], (new NoPcntlForkRule())->processNode($wrong, $this->scope));
+        $waitCall = new FuncCall(new Name('pcntl_wait'), [new Arg(new Variable('status'))]);
+        self::assertNotSame([], (new NoPcntlForkRule())->processNode($waitCall, $this->scope));
         self::assertSame([], (new NoPcntlSignalRule())->processNode($wrong, $this->scope));
         self::assertSame([], (new NoPosixProcessControlRule())->processNode($wrong, $this->scope));
         self::assertSame([], (new NoMissingResetInterfaceRule(false))->processNode(new Nop(), $this->scope));

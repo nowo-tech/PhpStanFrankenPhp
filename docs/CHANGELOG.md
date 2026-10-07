@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.2.3] - 2026-10-07](#123-2026-10-07)
 - [[1.2.2] - 2026-10-07](#122-2026-10-07)
 - [[1.2.1] - 2026-09-27](#121-2026-09-27)
 - [[1.2.0] - 2026-09-24](#120-2026-09-24)
@@ -21,6 +22,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [[1.0.0] - 2026-07-22](#100-2026-07-22)
 
 ## [Unreleased]
+
+## [1.2.3] - 2026-10-07
+
+### Added
+
+- **`NoPcntlForkRule`:** also flags `pcntl_wait` / `pcntl_waitpid` with a dedicated message (blocking wait on a child from the HTTP worker thread).
+- **Docs:** CLI / Messenger / supervisor `ignoreErrors` samples for pcntl/posix hardening identifiers; known gap note for dynamic `FuncCall`.
+
+### Changed
+
+- **`NoMissingResetInterfaceRule`:** fewer false positives on Symfony Form helpers — skip name suffixes `Form`, `FormType`, `TypeExtension`, `DataTransformer`, `DataMapper` and FQCN fragments `/form/`, `/forms/`.
+
+### Notes
+
+- **Consumer action:** re-run PHPStan if you use hardening and/or `flagMissingResetInterface`. See [UPGRADING.md](UPGRADING.md).
 
 ## [1.2.2] - 2026-10-07
 
@@ -167,7 +183,8 @@ First stable release of `nowo-tech/phpstan-frankenphp`: PHPStan rules to migrate
 - `NoSuperglobalAccessRule` defaults to `$_ENV` + `$_SESSION` only (aligned with FrankenPHP worker reset behaviour); request superglobals are opt-in via worker-strict / `flagRequestSuperglobals`.
 - Mutable static guidance no longer recommends invalid `readonly static` properties.
 
-[Unreleased]: https://github.com/nowo-tech/PhpStanFrankenPhp/compare/v1.2.2...HEAD
+[Unreleased]: https://github.com/nowo-tech/PhpStanFrankenPhp/compare/v1.2.3...HEAD
+[1.2.3]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.2.3
 [1.2.2]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.2.2
 [1.2.1]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.2.1
 [1.2.0]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.2.0

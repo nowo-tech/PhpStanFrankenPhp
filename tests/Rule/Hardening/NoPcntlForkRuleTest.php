@@ -25,6 +25,14 @@ final class NoPcntlForkRuleTest extends AbstractRuleTestCase
                 'pcntl_fork() is unsafe under FrankenPHP (threaded SAPI). Run isolated work in a separate process/container or a queue worker, not via fork from the request thread.',
                 11,
             ],
+            [
+                'pcntl_wait() blocks the request thread waiting on a child process — unsafe under FrankenPHP (threaded SAPI). Do not pair fork/wait with HTTP workers; use a queue worker or a dedicated CLI/supervisor process.',
+                12,
+            ],
+            [
+                'pcntl_waitpid() blocks the request thread waiting on a child process — unsafe under FrankenPHP (threaded SAPI). Do not pair fork/wait with HTTP workers; use a queue worker or a dedicated CLI/supervisor process.',
+                13,
+            ],
         ]);
     }
 }

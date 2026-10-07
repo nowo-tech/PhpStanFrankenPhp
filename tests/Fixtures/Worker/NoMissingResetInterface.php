@@ -256,3 +256,54 @@ final class ReadOnlyAccess
         return $x;
     }
 }
+
+final class CheckoutForm
+{
+    private string $step = 'cart';
+
+    public function next(string $step): void
+    {
+        $this->step = $step; // skipped by Form suffix
+    }
+}
+
+final class AddressFormType
+{
+    /** @var array<string, mixed> */
+    private array $options = [];
+
+    public function setDefault(string $k, mixed $v): void
+    {
+        $this->options[$k] = $v; // skipped by FormType suffix
+    }
+}
+
+final class MoneyDataTransformer
+{
+    private bool $dirty = false;
+
+    public function mark(): void
+    {
+        $this->dirty = true; // skipped by DataTransformer suffix
+    }
+}
+
+final class PriceTypeExtension
+{
+    private bool $configured = false;
+
+    public function configure(): void
+    {
+        $this->configured = true; // skipped by TypeExtension suffix
+    }
+}
+
+final class LineItemDataMapper
+{
+    private bool $mapped = false;
+
+    public function map(): void
+    {
+        $this->mapped = true; // skipped by DataMapper suffix
+    }
+}

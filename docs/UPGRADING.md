@@ -3,6 +3,17 @@
 
 ## Unreleased
 
+## To 1.2.3
+
+From **1.2.2** — hardening `pcntl_wait` / `pcntl_waitpid`; Form-oriented skips for missing ResetInterface.
+
+```bash
+composer update nowo-tech/phpstan-frankenphp
+```
+
+- If you enable `ruleset-hardening.neon`, `pcntl_wait` / `pcntl_waitpid` in analyzed paths will newly error (same identifier `frankenphp.hardening.noPcntlFork`). Ignore `bin/*` / Messenger / Command paths as documented in [RULES.md](RULES.md#cli--messenger--supervisors-pcntl--posix).
+- `NoMissingResetInterfaceRule` should report **fewer** Form/FormType false positives; no action unless you relied on those FPs somehow.
+
 ## To 1.2.2
 
 From **1.2.1** — FN fix for `NoMissingResetInterfaceRule` (array element / nested property / `unset` / `=&` writes).

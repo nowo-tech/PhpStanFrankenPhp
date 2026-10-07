@@ -74,7 +74,7 @@ As a platform engineer, I optionally enable **hardening** rules to block fork, u
 | FR-WRK-014 | `NoErrorReportingMutationRule` flags `error_reporting(...)` mutations |
 | FR-WRK-015 | `NoUmaskRule` flags `umask(...)` mutations |
 | FR-WRK-016 | `NoLocaleSetDefaultRule` flags `locale_set_default()` / `Locale::setDefault()` |
-| FR-WRK-017 | `NoMissingResetInterfaceRule` (opt-in) flags mutable `$this` state without `ResetInterface`, including writes through array elements (`$this->items[$k] = …`, `[] =`, assign-ops, inc/dec, `unset`) and nested properties (`$this->obj->prop = …`, `=&`); reads and method calls on the property are not reported |
+| FR-WRK-017 | `NoMissingResetInterfaceRule` (opt-in) flags mutable `$this` state without `ResetInterface`, including writes through array elements (`$this->items[$k] = …`, `[] =`, assign-ops, inc/dec, `unset`) and nested properties (`$this->obj->prop = …`, `=&`); reads and method calls on the property are not reported; heuristic skips include Form helpers (`*Form`, `*FormType`, `*TypeExtension`, `*DataTransformer`, `*DataMapper`, `/form/` `/forms/` FQCN fragments) |
 
 ### Hardening rules
 
@@ -82,7 +82,7 @@ As a platform engineer, I optionally enable **hardening** rules to block fork, u
 |----|-------------|
 | FR-HRD-001 | `NoUnlimitedExecutionTimeRule` flags unlimited execution time |
 | FR-HRD-002 | `NoUnlimitedMemoryRule` flags unlimited memory ini |
-| FR-HRD-003 | `NoPcntlForkRule` flags `pcntl_fork` |
+| FR-HRD-003 | `NoPcntlForkRule` flags `pcntl_fork` / `pcntl_exec` / `pcntl_rfork` / `pcntl_wait` / `pcntl_waitpid` |
 | FR-HRD-004 | `NoBlockingSleepRule` flags blocking `sleep`/`usleep` |
 | FR-HRD-005 | `NoRegisterTickFunctionRule` flags `register_tick_function` |
 | FR-HRD-006 | `NoPcntlSignalRule` flags pcntl signal APIs (`pcntl_signal`, `pcntl_sigprocmask`, `pcntl_alarm`, …) |

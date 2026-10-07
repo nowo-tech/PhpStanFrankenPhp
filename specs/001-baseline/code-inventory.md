@@ -50,7 +50,7 @@ Every production PHP file under `src/` is mapped below. Tests under `tests/` and
 | --- | --- | --- |
 | `Rule/Hardening/NoUnlimitedExecutionTimeRule.php` | Hardening — bounded execution time | FR-HRD-001 |
 | `Rule/Hardening/NoUnlimitedMemoryRule.php` | Hardening — bounded memory | FR-HRD-002 |
-| `Rule/Hardening/NoPcntlForkRule.php` | Hardening — no pcntl_fork | FR-HRD-003 |
+| `Rule/Hardening/NoPcntlForkRule.php` | Hardening — no pcntl_fork / wait | FR-HRD-003 |
 | `Rule/Hardening/NoBlockingSleepRule.php` | Hardening — no blocking sleep | FR-HRD-004 |
 | `Rule/Hardening/NoRegisterTickFunctionRule.php` | Hardening — no register_tick_function | FR-HRD-005 |
 | `Rule/Hardening/NoPcntlSignalRule.php` | Hardening — no pcntl signal APIs | FR-HRD-006 |

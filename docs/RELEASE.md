@@ -1,6 +1,6 @@
 # Release
 
-Current stable: **v1.2.2** (2026-10-07).
+Current stable: **v1.2.3** (2026-10-07).
 
 ## Checklist
 
@@ -11,9 +11,9 @@ Current stable: **v1.2.2** (2026-10-07).
 5. `make check-no-cursor-coauthor` (after the release commit, before push).
 6. Annotated tag and push:
    ```bash
-   git tag -a v1.2.2 -m "Release v1.2.2 - Detect array/nested writes in NoMissingResetInterfaceRule"
+   git tag -a v1.2.3 -m "Release v1.2.3 - pcntl_wait/waitpid + Form ResetInterface skips"
    git push origin main
-   git push origin v1.2.2
+   git push origin v1.2.3
    ```
 7. GitHub Actions [`release.yml`](../.github/workflows/release.yml) creates the GitHub Release from the tag and changelog section.
 

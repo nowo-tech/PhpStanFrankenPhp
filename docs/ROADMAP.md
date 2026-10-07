@@ -2,7 +2,7 @@
 
 Living plan for `nowo-tech/phpstan-frankenphp`. Ship rules only when they catch **real FrankenPHP classic/worker pitfalls**, keep false positives low, and preserve the classic → worker → hardening adoption order.
 
-Current stable: **v1.2.2**.
+Current stable: **v1.2.3**.
 
 **Primary target:** FrankenPHP worker with `FRANKENPHP_RESET_KERNEL` unset/false (kernel reused + `services_resetter`).
 
@@ -17,6 +17,7 @@ Current stable: **v1.2.2**.
 
 | Version | Focus |
 | --- | --- |
+| **1.2.3** | `pcntl_wait` / `pcntl_waitpid`; Form skips for missing ResetInterface; CLI/Messenger ignore docs |
 | **1.2.2** | `NoMissingResetInterfaceRule` detects array-element / nested property / `unset` / `=&` writes (FN fix) |
 | **1.2.1** | REQ-CS-008 Igor FrankenPHP worker audit (require-dev) |
 | **1.2.0** | Classic / worker / hardening baseline + opt-in missing ResetInterface + posix process control |
@@ -25,16 +26,19 @@ Current stable: **v1.2.2**.
 
 | Item | Level | Notes |
 | --- | --- | --- |
-| Document CLI path ignores for pcntl/posix/Messenger | Docs | Sample `ignoreErrors` for `bin/` + Messenger consumers |
-| Tighten `NoMissingResetInterfaceRule` heuristics | Worker | Fewer FPs on builders/forms; optional path allowlists |
-| Selective `pcntl_wait` / `pcntl_waitpid` in request code | Hardening | Only with clear messaging |
+| Optional `frankenphp.missingResetInterfaceSkipPathFragments` | Worker | Consumer path allowlists beyond built-in Form/Entity skips |
+| `pcntl_waitid` (when relevant on supported PHP) | Hardening | Same family as wait/waitpid |
+| Symfony `kernel.reset` tag / attribute without `ResetInterface` | Worker | Reduce FN when only the tag is used |
+| Method-mutating collaborators (`$this->bag->set()`) guidance | Worker | Document gap; optional experimental rule later |
 
 ## Medium term
 
 | Item | Level | Notes |
 | --- | --- | --- |
 | `ob_*` nesting / unmatched output buffer leaks | Worker | Needs solid FP analysis first |
-| Dynamic `FuncCall` (`$fn = 'chdir'`) | All | Rare; PHPStan limited — document as known gap |
+| Dynamic `FuncCall` (`$fn = 'chdir'`) | All | Rare; PHPStan limited — documented as known gap in RULES |
+| `header()` / early output that breaks worker streaming assumptions | Classic/Worker | Only with clear false-positive budget |
+| `stream_select` / indefinite blocking I/O in request code | Hardening | Sibling to blocking sleep |
 
 ## Explicit non-goals (for now)
 

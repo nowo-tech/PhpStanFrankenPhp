@@ -27,6 +27,7 @@ final class NoMissingResetInterfaceRuleTest extends AbstractRuleTestCase
         $this->analyse([
             __DIR__.'/../../Fixtures/Worker/NoMissingResetInterface.php',
             __DIR__.'/../../Fixtures/Worker/NoMissingResetInterfaceEntityNs.php',
+            __DIR__.'/../../Fixtures/Worker/NoMissingResetInterfaceFormNs.php',
         ], [
             ['Class DemoWorker\\NoMissingResetInterface'.$msg, 9],
             ['Class DemoWorker\\AssignOpMutator'.$msg, 54],

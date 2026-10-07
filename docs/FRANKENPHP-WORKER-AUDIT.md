@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|-------|
 | Package | `nowo-tech/phpstan-frankenphp` (`phpstan-extension`) |
-| Audited revision | `v1.2.2` |
+| Audited revision | `v1.2.3` |
 | Audit date | 2026-10-07 |
 | Method | Manual review of `src/`, neon rulesets, demos; rules aimed at apps running FrankenPHP worker with `FRANKENPHP_RESET_KERNEL` unset/false |
 | **Verdict** | Rulesets cover process/global/static leaks and (opt-in) missing `ResetInterface`. The extension itself never runs inside the HTTP worker. |
@@ -39,9 +39,9 @@ No runtime worker findings (N/A).
 
 ### Residual limits (consumer apps)
 
-- **Heuristic ResetInterface rule:** detects direct, array-element, and nested `$this` writes (v1.2.2+); may still miss unusual class names / false-positive on complex builders; not a substitute for reviewing third-party bundles.
-- **Dynamic calls** (`$fn = 'chdir'`) not detected.
-- **CLI / Messenger** paths that intentionally use pcntl/posix need `ignoreErrors` by path.
+- **Heuristic ResetInterface rule:** detects direct, array-element, and nested `$this` writes (v1.2.2+); Form helper name/FQCN skips reduce FPs; may still miss unusual class names / false-positive on complex builders; not a substitute for reviewing third-party bundles.
+- **Dynamic calls** (`$fn = 'chdir'`) not detected (documented gap in RULES).
+- **CLI / Messenger** paths that intentionally use pcntl/posix (including `pcntl_wait` / `pcntl_waitpid`) need `ignoreErrors` by path — see RULES.
 
 ## Usage recommendations
 

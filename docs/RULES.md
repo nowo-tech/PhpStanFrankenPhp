@@ -301,7 +301,7 @@ includes:
 
 **Detects:** classes that write to `$this->…` outside `__construct` / `reset` / lifecycle magic **without** implementing `Symfony\Contracts\Service\ResetInterface`. A write is any assignment (`=`, `=&`, `+=`, `??=`, …), increment/decrement or `unset()` targeting the property itself, one of its array elements (`$this->items[$k] = …`, `$this->items[] = …`, `unset($this->items[$k])`) or a nested property (`$this->obj->prop = …`). Reads (`isset`, `foreach`, local copies) and method calls on the property (`$this->collection->add()`) are not reported.
 
-**Why:** With `FRANKENPHP_RESET_KERNEL` unset/false the kernel is reused; only services with `ResetInterface` (or `kernel.reset`) are cleared by `services_resetter`. Heuristic skips entities/DTOs/messages/tests by name.
+**Why:** With `FRANKENPHP_RESET_KERNEL` unset/false the kernel is reused; only services with `ResetInterface` (or `kernel.reset`) are cleared by `services_resetter`. Heuristic skips entities/DTOs/messages/tests **and** Symfony Form helpers (`*Form`, `*FormType`, `*TypeExtension`, `*DataTransformer`, `*DataMapper`, FQCN fragments `/form/` / `/forms/`) by name.
 
 **Enable:** `frankenphp.flagMissingResetInterface: true` or include `ruleset-worker-no-kernel-reset.neon` (off by default).
 
@@ -339,11 +339,11 @@ includes:
 
 ### `NoPcntlForkRule` — `frankenphp.hardening.noPcntlFork`
 
-**Detects:** `pcntl_fork`, `pcntl_exec`, `pcntl_rfork`.
+**Detects:** `pcntl_fork`, `pcntl_exec`, `pcntl_rfork`, `pcntl_wait`, `pcntl_waitpid`.
 
-**Why:** FrankenPHP uses a threaded SAPI; forking from request threads is unsafe.
+**Why:** FrankenPHP uses a threaded SAPI; forking from request threads is unsafe. Blocking with `pcntl_wait` / `pcntl_waitpid` on a child is the same anti-pattern for HTTP workers (messages distinguish wait vs fork/exec).
 
-**Fix:** Separate process/container or queue worker.
+**Fix:** Separate process/container or queue worker. Keep fork/wait in CLI supervisors / Messenger consumers and ignore those paths (see [Ignoring a finding](#ignoring-a-finding)).
 
 **Demo:** `demo/hardening/bad/NoPcntlFork.php` · good: `demo/hardening/good/NoPcntlForkGood.php`
 
@@ -414,6 +414,31 @@ parameters:
             identifier: frankenphp.worker.noSuperglobalAccess
             path: src/Legacy/Bridge.php
 ```
+
+### CLI / Messenger / supervisors (pcntl & posix)
+
+Hardening flags process APIs that are legitimate outside the HTTP worker. Scope ignores to those trees instead of disabling the ruleset (repeat per identifier / path as needed):
+
+```neon
+parameters:
+    ignoreErrors:
+        -
+            identifier: frankenphp.hardening.noPcntlFork
+            path: bin/*
+        -
+            identifier: frankenphp.hardening.noPcntlSignal
+            path: bin/*
+        -
+            identifier: frankenphp.hardening.noPosixProcessControl
+            path: bin/*
+        # same three identifiers for src/MessageHandler/* and src/Command/* if needed
+```
+
+Adjust paths to your `bin/console` commands, Messenger consumers, and deploy supervisors. Alternatively exclude those paths from the hardening PHPStan run.
+
+### Known gap — dynamic `FuncCall`
+
+Calls via variables (`$fn = 'chdir'; $fn(...);`) are not detected. Prefer static calls or baseline rare dynamic sites explicitly.
 
 Or inline:
 

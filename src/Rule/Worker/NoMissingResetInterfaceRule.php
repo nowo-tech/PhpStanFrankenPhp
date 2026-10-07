@@ -68,8 +68,25 @@ final class NoMissingResetInterfaceRule implements Rule
         'fixture',
         'factory',
         'builder',
+        'form',
+        'formtype',
+        'typeextension',
+        'datatransformer',
+        'datamapper',
         'test',
         'testcase',
+    ];
+
+    private const SKIP_FQCN_FRAGMENTS = [
+        '/entity/',
+        '/dto/',
+        '/message/',
+        '/event/',
+        '/exception/',
+        '/form/',
+        '/forms/',
+        '/tests/',
+        '/fixtures/',
     ];
 
     public function __construct(
@@ -145,7 +162,7 @@ final class NoMissingResetInterfaceRule implements Rule
         }
 
         $lowerFqcn = strtolower(str_replace('\\', '/', $fqcn));
-        foreach (['/entity/', '/dto/', '/message/', '/event/', '/exception/', '/tests/', '/fixtures/'] as $fragment) {
+        foreach (self::SKIP_FQCN_FRAGMENTS as $fragment) {
             if (str_contains($lowerFqcn, $fragment)) {
                 return true;
             }
