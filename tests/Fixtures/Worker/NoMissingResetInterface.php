@@ -88,3 +88,171 @@ abstract class AbstractLeaky
         ++$this->n; // skipped: abstract class
     }
 }
+
+final class ArrayWrite
+{
+    /** @var array<int, string> */
+    private array $tokens = [];
+
+    public function get(int $id): string
+    {
+        if (!isset($this->tokens[$id])) {
+            $this->tokens[$id] = (string) $id; // error: ArrayDimFetch write
+        }
+
+        return $this->tokens[$id];
+    }
+}
+
+final class ArrayAppend
+{
+    /** @var list<string> */
+    private array $items = [];
+
+    public function add(string $item): void
+    {
+        $this->items[] = $item; // error: ArrayDimFetch append
+    }
+}
+
+final class NestedArrayWrite
+{
+    /** @var array<string, array<string, int>> */
+    private array $matrix = [];
+
+    public function set(string $k, string $j, int $v): void
+    {
+        $this->matrix[$k][$j] = $v; // error: nested ArrayDimFetch write
+    }
+}
+
+final class ArrayAssignOp
+{
+    /** @var array<string, int> */
+    private array $counters = [];
+
+    public function bump(string $k): void
+    {
+        $this->counters[$k] += 2; // error: AssignOp on ArrayDimFetch
+    }
+}
+
+final class ArrayCoalesceAssign
+{
+    /** @var array<string, string> */
+    private array $items = [];
+
+    public function remember(string $k, string $v): void
+    {
+        $this->items[$k] ??= $v; // error: AssignOp\Coalesce on ArrayDimFetch
+    }
+}
+
+final class ArrayIncDec
+{
+    /** @var array<string, int> */
+    private array $counters = [];
+
+    public function up(string $k): void
+    {
+        ++$this->counters[$k]; // error: PreInc on ArrayDimFetch
+    }
+
+    public function down(string $k): void
+    {
+        $previous = $this->counters[$k]--; // error: PostDec on ArrayDimFetch
+    }
+}
+
+final class ArrayUnset
+{
+    /** @var array<string, string> */
+    private array $items = [];
+
+    public function forget(string $k): void
+    {
+        unset($this->items[$k]); // error: unset on ArrayDimFetch
+    }
+}
+
+final class NestedPropertyWrite
+{
+    private \stdClass $config;
+
+    public function __construct()
+    {
+        $this->config = new \stdClass();
+    }
+
+    public function set(string $v): void
+    {
+        $this->config->value = $v; // error: nested PropertyFetch write
+    }
+}
+
+final class NestedPropertyArrayWrite
+{
+    private \stdClass $config;
+
+    public function __construct()
+    {
+        $this->config = new \stdClass();
+        $this->config->values = [];
+    }
+
+    public function set(string $k, string $v): void
+    {
+        $this->config->values[$k] = $v; // error: ArrayDimFetch on nested PropertyFetch
+    }
+}
+
+final class AssignByRef
+{
+    /** @var array<string, string> */
+    private array $items = [];
+
+    public function bind(array &$source): void
+    {
+        $this->items = &$source; // error: AssignRef
+    }
+}
+
+final class ReadOnlyAccess
+{
+    /** @var array<string, string> */
+    private array $items = [];
+
+    private \stdClass $config;
+
+    public function __construct()
+    {
+        $this->config = new \stdClass();
+    }
+
+    public function has(string $k): bool
+    {
+        return isset($this->items[$k]);
+    }
+
+    public function first(): ?string
+    {
+        foreach ($this->items as $item) {
+            return $item;
+        }
+
+        return null;
+    }
+
+    public function copy(string $k): string
+    {
+        $x = $this->items[$k];
+        $local = [];
+        $local[$k] = $x;
+        $other = new \stdClass();
+        $other->value = $this->config->value;
+        $other->list[$k] = $x;
+        unset($local[$k], $other);
+
+        return $x;
+    }
+}

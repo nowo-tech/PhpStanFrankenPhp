@@ -6,3 +6,4 @@ parameters:
     level: 0
     paths:
         - worker/bad/NoMissingResetInterface.php
+        - worker/bad/NoMissingResetInterfaceArrayWrite.php

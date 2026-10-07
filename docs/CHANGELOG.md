@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`NoMissingResetInterfaceRule`:** false negative on writes through array elements and nested properties (`$this->items[$k] = …`, `$this->items[] = …`, `$this->counters[$k]++`, `$this->items[$k] ??= …`, `unset($this->items[$k])`, `$this->obj->prop = …`, `=&`) — only a direct `$this->prop = …` was detected, so in-memory per-request caches held in arrays were missed.
+
 ## [1.2.1] - 2026-09-27
 
 ### Added

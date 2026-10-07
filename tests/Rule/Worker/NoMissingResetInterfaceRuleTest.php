@@ -30,6 +30,16 @@ final class NoMissingResetInterfaceRuleTest extends AbstractRuleTestCase
         ], [
             ['Class DemoWorker\\NoMissingResetInterface'.$msg, 9],
             ['Class DemoWorker\\AssignOpMutator'.$msg, 54],
+            ['Class DemoWorker\\ArrayWrite'.$msg, 92],
+            ['Class DemoWorker\\ArrayAppend'.$msg, 107],
+            ['Class DemoWorker\\NestedArrayWrite'.$msg, 118],
+            ['Class DemoWorker\\ArrayAssignOp'.$msg, 129],
+            ['Class DemoWorker\\ArrayCoalesceAssign'.$msg, 140],
+            ['Class DemoWorker\\ArrayIncDec'.$msg, 151],
+            ['Class DemoWorker\\ArrayUnset'.$msg, 167],
+            ['Class DemoWorker\\NestedPropertyWrite'.$msg, 178],
+            ['Class DemoWorker\\NestedPropertyArrayWrite'.$msg, 193],
+            ['Class DemoWorker\\AssignByRef'.$msg, 209],
         ]);
     }
 }
