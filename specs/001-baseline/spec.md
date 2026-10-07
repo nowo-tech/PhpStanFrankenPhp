@@ -74,7 +74,7 @@ As a platform engineer, I optionally enable **hardening** rules to block fork, u
 | FR-WRK-014 | `NoErrorReportingMutationRule` flags `error_reporting(...)` mutations |
 | FR-WRK-015 | `NoUmaskRule` flags `umask(...)` mutations |
 | FR-WRK-016 | `NoLocaleSetDefaultRule` flags `locale_set_default()` / `Locale::setDefault()` |
-| FR-WRK-017 | `NoMissingResetInterfaceRule` (opt-in) flags mutable `$this` state without `ResetInterface` |
+| FR-WRK-017 | `NoMissingResetInterfaceRule` (opt-in) flags mutable `$this` state without `ResetInterface`, including writes through array elements (`$this->items[$k] = …`, `[] =`, assign-ops, inc/dec, `unset`) and nested properties (`$this->obj->prop = …`, `=&`); reads and method calls on the property are not reported |
 
 ### Hardening rules
 

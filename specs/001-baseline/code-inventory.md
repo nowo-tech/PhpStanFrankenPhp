@@ -2,7 +2,7 @@
 
 **Baseline spec**: [`spec.md`](spec.md)  
 **Package**: `nowo-tech/phpstan-frankenphp`  
-**Last audited**: 2026-09-24
+**Last audited**: 2026-10-07
 
 Every production PHP file under `src/` is mapped below. Tests under `tests/` and demo fixtures under `demo/` are validated separately (see spec acceptance criteria).
 
@@ -42,7 +42,7 @@ Every production PHP file under `src/` is mapped below. Tests under `tests/` and
 | `Rule/Worker/NoMbEncodingMutationRule.php` | Worker — no mbstring encoding/language mutation | FR-WRK-013 |
 | `Rule/Worker/NoErrorReportingMutationRule.php` | Worker — no error_reporting mutation | FR-WRK-014 |
 | `Rule/Worker/NoUmaskRule.php` | Worker — no umask mutation | FR-WRK-015 |
-| `Rule/Worker/NoMissingResetInterfaceRule.php` | Worker — missing ResetInterface (opt-in) | FR-WRK-017 |
+| `Rule/Worker/NoMissingResetInterfaceRule.php` | Worker — missing ResetInterface (opt-in); array/nested writes | FR-WRK-017 |
 
 ## Hardening rules (`src/Rule/Hardening`)
 

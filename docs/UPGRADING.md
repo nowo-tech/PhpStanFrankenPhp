@@ -3,6 +3,17 @@
 
 ## Unreleased
 
+## To 1.2.2
+
+From **1.2.1** — FN fix for `NoMissingResetInterfaceRule` (array element / nested property / `unset` / `=&` writes).
+
+```bash
+composer update nowo-tech/phpstan-frankenphp
+```
+
+- If you use `ruleset-worker-no-kernel-reset.neon` or `frankenphp.flagMissingResetInterface: true`, re-run PHPStan. Classes that only mutated `$this->…` via `$this->items[$k] = …`, appends, assign-ops, increments, `unset($this->items[$k])`, nested `$this->obj->prop = …`, or `=&` may newly be flagged; implement `reset()` / stay stateless, or ignore by identifier for intentional exceptions.
+- require-dev only: `igor-php/igor-php` may resolve to `^0.10` — not pulled transitively by consumers.
+
 ## To 1.2.1
 
 From **1.2.0** — REQ-CS-008 Igor FrankenPHP worker audit (igor-php require-dev, igor.json, make igor).

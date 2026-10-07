@@ -2,7 +2,7 @@
 
 Living plan for `nowo-tech/phpstan-frankenphp`. Ship rules only when they catch **real FrankenPHP classic/worker pitfalls**, keep false positives low, and preserve the classic → worker → hardening adoption order.
 
-Current stable: **v1.2.0**.
+Current stable: **v1.2.2**.
 
 **Primary target:** FrankenPHP worker with `FRANKENPHP_RESET_KERNEL` unset/false (kernel reused + `services_resetter`).
 
@@ -13,13 +13,13 @@ Current stable: **v1.2.0**.
 - Do **not** ban entire ecosystems (all of `pcntl_*`, all of `posix_*`) when CLI / Messenger / supervisors legitimately need them outside the web SAPI.
 - Every new rule: `rules/*.neon` + `docs/RULES.md` + RuleTestCase + `demo/*/bad|good` (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 
-## Shipped in 1.2.0
+## Shipped in 1.2.x
 
-| Level | Focus |
+| Version | Focus |
 | --- | --- |
-| Classic | `exit`/`die`, FastCGI, `putenv`, `ignore_user_abort`, unbounded I/O timeouts |
-| Worker | Statics/globals/superglobals/sessions/singletons/handlers + process state + **opt-in missing ResetInterface** (`ruleset-worker-no-kernel-reset.neon`) |
-| Hardening | Unlimited time/memory, pcntl fork/signal, blocking sleep, ticks, **posix process control** |
+| **1.2.2** | `NoMissingResetInterfaceRule` detects array-element / nested property / `unset` / `=&` writes (FN fix) |
+| **1.2.1** | REQ-CS-008 Igor FrankenPHP worker audit (require-dev) |
+| **1.2.0** | Classic / worker / hardening baseline + opt-in missing ResetInterface + posix process control |
 
 ## Near term (1.2.x / 1.3)
 
