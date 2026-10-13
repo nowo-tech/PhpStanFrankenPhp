@@ -31,4 +31,30 @@ final class NoGlobalStateWriteRuleTest extends AbstractRuleTestCase
             ],
         ]);
     }
+
+    public function testCompoundAssignmentsAndIncrementsAreReported(): void
+    {
+        $this->analyse([__DIR__.'/../../Fixtures/Worker/NoGlobalStateWriteExtra.php'], [
+            [
+                'Writing to $GLOBALS persists across FrankenPHP worker requests. Prefer dependency injection or request attributes.',
+                11,
+            ],
+            [
+                'Writing to $GLOBALS persists across FrankenPHP worker requests. Prefer dependency injection or request attributes.',
+                12,
+            ],
+            [
+                'Writing to $GLOBALS persists across FrankenPHP worker requests. Prefer dependency injection or request attributes.',
+                13,
+            ],
+            [
+                'Writing to $GLOBALS persists across FrankenPHP worker requests. Prefer dependency injection or request attributes.',
+                14,
+            ],
+            [
+                'Writing to $GLOBALS persists across FrankenPHP worker requests. Prefer dependency injection or request attributes.',
+                15,
+            ],
+        ]);
+    }
 }

@@ -7,6 +7,12 @@ namespace NowoTech\PhpStanFrankenPhp\Rule\Worker;
 use PhpParser\Node;
 use PhpParser\Node\Expr\ArrayDimFetch;
 use PhpParser\Node\Expr\Assign;
+use PhpParser\Node\Expr\AssignOp;
+use PhpParser\Node\Expr\AssignRef;
+use PhpParser\Node\Expr\PostDec;
+use PhpParser\Node\Expr\PostInc;
+use PhpParser\Node\Expr\PreDec;
+use PhpParser\Node\Expr\PreInc;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Stmt\Global_;
 use PHPStan\Analyser\Scope;
@@ -18,6 +24,9 @@ use PHPStan\Rules\RuleErrorBuilder;
  *
  * Globals in the worker script / process survive requests and are a common
  * source of cross-request contamination when leaving FPM.
+ *
+ * Writes cover `=`, `=&`, compound assignments (`$GLOBALS['x'] .= …`) and `++` / `--`.
+ * The node type stays {@see Node}: `Stmt\Global_` and the `Expr\*` writes share no narrower parent.
  *
  * @implements Rule<Node>
  */
@@ -40,7 +49,7 @@ final class NoGlobalStateWriteRule implements Rule
             ];
         }
 
-        if ($node instanceof Assign && $this->isGlobalsWrite($node->var)) {
+        if ($this->isWrite($node) && $this->isGlobalsWrite($node->var)) {
             return [
                 RuleErrorBuilder::message(
                     'Writing to $GLOBALS persists across FrankenPHP worker requests. Prefer dependency injection or request attributes.'
@@ -51,6 +60,20 @@ final class NoGlobalStateWriteRule implements Rule
         }
 
         return [];
+    }
+
+    /**
+     * @phpstan-assert-if-true Assign|AssignRef|AssignOp|PreInc|PostInc|PreDec|PostDec $node
+     */
+    private function isWrite(Node $node): bool
+    {
+        return $node instanceof Assign
+            || $node instanceof AssignRef
+            || $node instanceof AssignOp
+            || $node instanceof PreInc
+            || $node instanceof PostInc
+            || $node instanceof PreDec
+            || $node instanceof PostDec;
     }
 
     private function isGlobalsWrite(Node\Expr $expr): bool

@@ -28,6 +28,8 @@ return (new Config())
         (new Finder())
             ->in(__DIR__ . '/src')
             ->in(__DIR__ . '/tests')
-            ->exclude(['vendor', 'var', 'coverage', '.phpunit.cache'])
+            // Fixtures are deliberately "bad" code: fixers would rewrite the constructs under test
+            // (e.g. split `static $a, $b`, turn `$x++` into `++$x`, replace `ini_alter()` by `ini_set()`).
+            ->exclude(['vendor', 'var', 'coverage', '.phpunit.cache', 'Fixtures'])
             ->files()
     );

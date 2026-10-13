@@ -3,6 +3,8 @@
 
 ## Unreleased
 
+- **More findings:** `frankenphp.worker.noMutableStaticProperty`, `frankenphp.worker.noGlobalStateWrite` and `frankenphp.worker.noPersistentIniSet` now report compound assignments / `++` / `--`, every property of `static $a, $b;`, and `ini_alter()`. Existing messages are unchanged, so baselines keep matching; new findings may appear — fix them or regenerate the baseline.
+
 ## To 1.2.3
 
 From **1.2.2** — hardening `pcntl_wait` / `pcntl_waitpid`; Form-oriented skips for missing ResetInterface.

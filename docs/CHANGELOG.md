@@ -23,6 +23,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `NoMutableStaticPropertyRule` reports every property of a multi-property declaration (`private static $a, $b;` only reported `$a`) and detects compound assignments (`.=`, `+=`, `??=`, …), reference assignments (`=&`) and `++` / `--` on static properties, not only `=`.
+- `NoGlobalStateWriteRule` detects compound assignments (`$GLOBALS['x'] .= …`, `??=`), reference assignments and `++` / `--` on `$GLOBALS`.
+- `NoPersistentIniSetRule` also flags the `ini_alter()` alias (messages name the function actually called).
+
+### Changed
+
+- `NoLocaleSetDefaultRule`, `NoSingletonGetInstanceRule` and `NoUnlimitedIoTimeoutRule` now register for `PhpParser\Node\Expr\CallLike` instead of every `Node` (same detection, fewer callbacks). `NoMutableStaticPropertyRule` and `NoGlobalStateWriteRule` keep `Node` because they inspect both statements and expressions.
+- PHP-CS-Fixer no longer formats `tests/Fixtures` (it rewrote the constructs under test).
+
 ## [1.2.3] - 2026-10-07
 
 ### Added

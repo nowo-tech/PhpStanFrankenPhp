@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace NowoTech\PhpStanFrankenPhp\Rule\Worker;
 
 use PhpParser\Node;
+use PhpParser\Node\Expr\CallLike;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Identifier;
@@ -19,13 +20,15 @@ use PHPStan\Rules\RuleErrorBuilder;
  * Singletons keep mutable instance state for the worker lifetime and are a
  * frequent source of "works on FPM, wrong user on worker" bugs.
  *
- * @implements Rule<Node>
+ * Node type narrowed to {@see CallLike} (common parent of the function/method/static calls checked).
+ *
+ * @implements Rule<CallLike>
  */
 final class NoSingletonGetInstanceRule implements Rule
 {
     public function getNodeType(): string
     {
-        return Node::class;
+        return CallLike::class;
     }
 
     public function processNode(Node $node, Scope $scope): array

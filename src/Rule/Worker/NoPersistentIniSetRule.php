@@ -13,7 +13,7 @@ use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
 
 /**
- * Level 2 (worker) — flags ini_set() for settings that stick on the worker.
+ * Level 2 (worker) — flags ini_set() (and its alias ini_alter()) for settings that stick on the worker.
  *
  * Many ini values are process-wide. Changing them mid-request alters behaviour
  * for every later request on the same FrankenPHP worker thread.
@@ -53,15 +53,20 @@ final class NoPersistentIniSetRule implements Rule
 
     public function processNode(Node $node, Scope $scope): array
     {
-        if (!$node instanceof FuncCall || !NodeHelper::isFunctionNamedExactly($node, 'ini_set')) {
+        if (!$node instanceof FuncCall || !NodeHelper::isFunctionNamed($node, ['ini_set', 'ini_alter'])) {
             return [];
         }
+
+        $function = NodeHelper::isFunctionNamedExactly($node, 'ini_alter') ? 'ini_alter' : 'ini_set';
 
         $keyExpr = NodeHelper::firstArgExpr($node);
         if (!$keyExpr instanceof String_) {
             return [
                 RuleErrorBuilder::message(
-                    'ini_set() may change process-wide settings that persist on FrankenPHP workers. Prefer php.ini / FrankenPHP image config, or limit changes to request-safe keys with an explicit reset.'
+                    \sprintf(
+                        '%s() may change process-wide settings that persist on FrankenPHP workers. Prefer php.ini / FrankenPHP image config, or limit changes to request-safe keys with an explicit reset.',
+                        $function
+                    )
                 )
                     ->identifier('frankenphp.worker.noPersistentIniSet')
                     ->build(),
@@ -76,7 +81,8 @@ final class NoPersistentIniSetRule implements Rule
         return [
             RuleErrorBuilder::message(
                 \sprintf(
-                    'ini_set(\'%s\', …) changes a process-wide setting that persists on FrankenPHP workers and affects later requests. Configure it in php.ini / the FrankenPHP image instead.',
+                    '%s(\'%s\', …) changes a process-wide setting that persists on FrankenPHP workers and affects later requests. Configure it in php.ini / the FrankenPHP image instead.',
+                    $function,
                     $keyExpr->value
                 )
             )

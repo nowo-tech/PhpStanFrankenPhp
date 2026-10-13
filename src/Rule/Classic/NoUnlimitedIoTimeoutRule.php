@@ -7,6 +7,7 @@ namespace NowoTech\PhpStanFrankenPhp\Rule\Classic;
 use NowoTech\PhpStanFrankenPhp\Support\NodeHelper;
 use PhpParser\Node;
 use PhpParser\Node\Expr;
+use PhpParser\Node\Expr\CallLike;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Identifier;
@@ -22,13 +23,15 @@ use PHPStan\Rules\RuleErrorBuilder;
  * (REQ-RUNTIME-001). Detects setTimeout(null|0), curl CURLOPT_* timeout 0,
  * and proc_open without an obvious timeout wrapper (advisory on proc_open).
  *
- * @implements Rule<Node>
+ * Node type narrowed to {@see CallLike} (common parent of the function/method/static calls checked).
+ *
+ * @implements Rule<CallLike>
  */
 final class NoUnlimitedIoTimeoutRule implements Rule
 {
     public function getNodeType(): string
     {
-        return Node::class;
+        return CallLike::class;
     }
 
     public function processNode(Node $node, Scope $scope): array

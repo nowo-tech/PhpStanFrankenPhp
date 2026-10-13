@@ -37,4 +37,18 @@ final class NoPersistentIniSetRuleTest extends AbstractRuleTestCase
             ],
         ]);
     }
+
+    public function testIniAlterAliasIsReported(): void
+    {
+        $this->analyse([__DIR__.'/../../Fixtures/Worker/NoPersistentIniAlter.php'], [
+            [
+                "ini_alter('memory_limit', …) changes a process-wide setting that persists on FrankenPHP workers and affects later requests. Configure it in php.ini / the FrankenPHP image instead.",
+                11,
+            ],
+            [
+                'ini_alter() may change process-wide settings that persist on FrankenPHP workers. Prefer php.ini / FrankenPHP image config, or limit changes to request-safe keys with an explicit reset.',
+                12,
+            ],
+        ]);
+    }
 }

@@ -6,6 +6,7 @@ namespace NowoTech\PhpStanFrankenPhp\Rule\Worker;
 
 use NowoTech\PhpStanFrankenPhp\Support\NodeHelper;
 use PhpParser\Node;
+use PhpParser\Node\Expr\CallLike;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Identifier;
@@ -21,13 +22,15 @@ use PHPStan\Rules\RuleErrorBuilder;
  * `locale_set_default()` / `Locale::setDefault()` change the process-wide ICU
  * default locale, which sticks on FrankenPHP workers across requests.
  *
- * @implements Rule<Node>
+ * Node type narrowed to {@see CallLike} (common parent of the function/method/static calls checked).
+ *
+ * @implements Rule<CallLike>
  */
 final class NoLocaleSetDefaultRule implements Rule
 {
     public function getNodeType(): string
     {
-        return Node::class;
+        return CallLike::class;
     }
 
     public function processNode(Node $node, Scope $scope): array

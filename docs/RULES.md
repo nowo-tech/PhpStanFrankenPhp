@@ -106,7 +106,7 @@ includes:
 
 ### `NoMutableStaticPropertyRule` — `frankenphp.worker.noMutableStaticProperty`
 
-**Detects:** Mutable `static` properties and assignments to them.
+**Detects:** Mutable `static` properties (every property of `static $a, $b;`) and writes to them: `=`, `=&`, compound assignments (`.=`, `+=`, `??=`, …) and `++` / `--`, including array offsets (`self::$cache['k'] .= …`).
 
 **Why:** Static state is kept for the worker lifetime and leaks across users.
 
@@ -130,7 +130,7 @@ includes:
 
 ### `NoGlobalStateWriteRule` — `frankenphp.worker.noGlobalStateWrite`
 
-**Detects:** `global` keyword and writes to `$GLOBALS`.
+**Detects:** `global` keyword and writes to `$GLOBALS`: `=`, `=&`, compound assignments (`$GLOBALS['x'] .= …`) and `++` / `--`.
 
 **Why:** Globals survive across worker requests.
 
@@ -168,7 +168,7 @@ includes:
 
 ### `NoPersistentIniSetRule` — `frankenphp.worker.noPersistentIniSet`
 
-**Detects:** `ini_set()` for process-persistent keys (`memory_limit`, `max_execution_time`, timezone, session.*, …).
+**Detects:** `ini_set()` and its alias `ini_alter()` for process-persistent keys (`memory_limit`, `max_execution_time`, timezone, session.*, …).
 
 **Why:** Many INI settings stick on the worker and change later requests.
 
