@@ -1,5 +1,24 @@
 # Upgrading
 
+## Table of contents
+
+- [Unreleased](#unreleased)
+- [To 1.3.0](#to-130)
+- [To 1.2.3](#to-123)
+- [To 1.2.2](#to-122)
+- [To 1.2.1](#to-121)
+- [General process](#general-process)
+- [Upgrading to 1.2.0](#upgrading-to-120)
+  - [Consumer action](#consumer-action)
+- [Upgrading to 1.1.3](#upgrading-to-113)
+- [Upgrading to 1.1.2](#upgrading-to-112)
+- [Upgrading to 1.1.1](#upgrading-to-111)
+- [Upgrading to 1.1.0](#upgrading-to-110)
+- [Upgrading to 1.0.3](#upgrading-to-103)
+- [Upgrading to 1.0.2 / 1.0.1](#upgrading-to-102--101)
+- [Adopting 1.0.0 (first stable release)](#adopting-100-first-stable-release)
+- [PHPStan major upgrades](#phpstan-major-upgrades)
+
 ## Unreleased
 
 ## To 1.3.0
