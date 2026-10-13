@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.3.0] - 2026-10-13](#130-2026-10-13)
 - [[1.2.3] - 2026-10-07](#123-2026-10-07)
 - [[1.2.2] - 2026-10-07](#122-2026-10-07)
 - [[1.2.1] - 2026-09-27](#121-2026-09-27)
@@ -22,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [[1.0.0] - 2026-07-22](#100-2026-07-22)
 
 ## [Unreleased]
+
+## [1.3.0] - 2026-10-13
 
 ### Fixed
 
@@ -194,7 +197,8 @@ First stable release of `nowo-tech/phpstan-frankenphp`: PHPStan rules to migrate
 - `NoSuperglobalAccessRule` defaults to `$_ENV` + `$_SESSION` only (aligned with FrankenPHP worker reset behaviour); request superglobals are opt-in via worker-strict / `flagRequestSuperglobals`.
 - Mutable static guidance no longer recommends invalid `readonly static` properties.
 
-[Unreleased]: https://github.com/nowo-tech/PhpStanFrankenPhp/compare/v1.2.3...HEAD
+[Unreleased]: https://github.com/nowo-tech/PhpStanFrankenPhp/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.3.0
 [1.2.3]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.2.3
 [1.2.2]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.2.2
 [1.2.1]: https://github.com/nowo-tech/PhpStanFrankenPhp/releases/tag/v1.2.1

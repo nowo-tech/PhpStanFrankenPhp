@@ -1,7 +1,14 @@
 # Upgrading
 
-
 ## Unreleased
+
+## To 1.3.0
+
+From **1.2.3** — rules catch all static/global write forms and ini_alter; narrower node types.
+
+```bash
+composer update nowo-tech/phpstan-frankenphp
+```
 
 - **More findings:** `frankenphp.worker.noMutableStaticProperty`, `frankenphp.worker.noGlobalStateWrite` and `frankenphp.worker.noPersistentIniSet` now report compound assignments / `++` / `--`, every property of `static $a, $b;`, and `ini_alter()`. Existing messages are unchanged, so baselines keep matching; new findings may appear — fix them or regenerate the baseline.
 
