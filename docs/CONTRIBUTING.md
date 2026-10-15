@@ -37,3 +37,7 @@ make demo-classic-good demo-worker-good demo-hardening-good
 - Run `make igor` for the Igor FrankenPHP worker-state audit (REQ-CS-008).
 - After commits that will be pushed: `make check-no-cursor-coauthor`.
 - If CI fails because trailers are already on the remote, run `make strip-cursor-coauthor-from-history` before `git push --force-with-lease`. See [GITHUB_CI.md](GITHUB_CI.md).
+
+## AI co-author trailers
+
+Do **not** add AI co-author trailers to commit messages: neither `Co-authored-by: Cursor` / `cursoragent@cursor.com` nor `Co-Authored-By: Claude …` / `noreply@anthropic.com` (REQ-GIT-001). Run `make setup-hooks` so the `commit-msg` hook strips them.
