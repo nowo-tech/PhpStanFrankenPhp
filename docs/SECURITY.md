@@ -1,5 +1,12 @@
 # Security
 
+## Table of contents
+
+- [Scope](#scope)
+- [Reporting](#reporting)
+- [Notes for consumers](#notes-for-consumers)
+- [Release security checklist (12.4.1)](#release-security-checklist-1241)
+
 ## Scope
 
 This package is a **dev-time static analyser**. It does not execute analysed application code and does not open network connections at runtime for consumers.

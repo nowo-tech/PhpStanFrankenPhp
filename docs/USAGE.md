@@ -1,5 +1,12 @@
 # Usage
 
+## Table of contents
+
+- [Day-to-day](#day-to-day)
+- [Package demos (this repository)](#package-demos-this-repository)
+- [Suggested CI gate](#suggested-ci-gate)
+- [Related docs](#related-docs)
+
 ## Day-to-day
 
 ```bash

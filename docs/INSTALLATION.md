@@ -1,5 +1,11 @@
 # Installation
 
+## Table of contents
+
+- [Requirements](#requirements)
+- [Install](#install)
+- [Verify](#verify)
+
 ## Requirements
 
 - PHP `>= 8.1 < 8.6`

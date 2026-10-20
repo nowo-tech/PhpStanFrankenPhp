@@ -24,6 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Documentation: wave-1 REQ compliance — README documentation list order (Roadmap last, extras under Additional documentation), canonical issue templates, CONTRIBUTING Cursor Agent settings (REQ-IDE-006), tables of contents in long docs, SPEC-DRIVEN-DEVELOPMENT rewritten to the REQ-DOCS-013 pattern, full GitHub Spec Kit manual, baseline spec non-goals and validation commands, DEMO-FRANKENPHP production and troubleshooting sections, commented demo `.env.example` and `.gitignore`.
+
 ## [1.3.0] - 2026-10-13
 
 ### Fixed

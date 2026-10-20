@@ -105,6 +105,21 @@ As a platform engineer, I optionally enable **hardening** rules to block fork, u
 
 ---
 
+## Explicit non-goals
+
+- Not a FrankenPHP runtime or Caddy configuration generator.
+- Not a Symfony bundle (package type `phpstan-extension`).
+- `extension.neon` never enables rules by itself; consumers opt in level by level.
+
+---
+
 ## Validation
 
-`composer qa`, PHPUnit rule tests, and demo PHPStan runs per Makefile targets.
+```bash
+composer qa                  # cs-check, phpstan, tests
+composer test                # PHPUnit RuleTestCase suite
+composer demo-all            # bad demos report the expected errors
+composer demo-classic-good   # good demos report zero errors (also demo-worker-good, demo-hardening-good)
+make release-check           # full pre-release gate (Docker)
+find src -type f | wc -l     # must equal the inventory total (SC-001)
+```

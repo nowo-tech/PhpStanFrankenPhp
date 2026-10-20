@@ -9,6 +9,46 @@ Table of contents:
 - [Identifiers](#identifiers)
 - [Ignoring a finding](#ignoring-a-finding)
 
+## Table of contents
+
+- [Application order](#application-order)
+- [Level 1 — Classic (FPM → FrankenPHP classic)](#level-1--classic-fpm--frankenphp-classic)
+  - [`NoExitOrDieRule` — `frankenphp.classic.noExitOrDie`](#noexitordierule--frankenphpclassicnoexitordie)
+  - [`NoFastCgiFinishRequestRule` — `frankenphp.classic.noFastCgiFinishRequest`](#nofastcgifinishrequestrule--frankenphpclassicnofastcgifinishrequest)
+  - [`NoPutenvRule` — `frankenphp.classic.noPutenv`](#noputenvrule--frankenphpclassicnoputenv)
+  - [`NoIgnoreUserAbortRule` — `frankenphp.classic.noIgnoreUserAbort`](#noignoreuserabortrule--frankenphpclassicnoignoreuserabort)
+  - [`NoUnlimitedIoTimeoutRule` — `frankenphp.classic.noUnlimitedIoTimeout`](#nounlimitediotimeoutrule--frankenphpclassicnounlimitediotimeout)
+- [Level 2 — Worker (classic → worker)](#level-2--worker-classic--worker)
+  - [`NoMutableStaticPropertyRule` — `frankenphp.worker.noMutableStaticProperty`](#nomutablestaticpropertyrule--frankenphpworkernomutablestaticproperty)
+  - [`NoStaticLocalVariableRule` — `frankenphp.worker.noStaticLocalVariable`](#nostaticlocalvariablerule--frankenphpworkernostaticlocalvariable)
+  - [`NoGlobalStateWriteRule` — `frankenphp.worker.noGlobalStateWrite`](#noglobalstatewriterule--frankenphpworkernoglobalstatewrite)
+  - [`NoSuperglobalAccessRule` — `frankenphp.worker.noEnvMutation` / `frankenphp.worker.noSuperglobalAccess`](#nosuperglobalaccessrule--frankenphpworkernoenvmutation--frankenphpworkernosuperglobalaccess)
+  - [`NoNativeSessionApiRule` — `frankenphp.worker.noNativeSessionApi`](#nonativesessionapirule--frankenphpworkernonativesessionapi)
+  - [`NoPersistentIniSetRule` — `frankenphp.worker.noPersistentIniSet`](#nopersistentinisetrule--frankenphpworkernopersistentiniset)
+  - [`NoSingletonGetInstanceRule` — `frankenphp.worker.noSingletonGetInstance`](#nosingletongetinstancerule--frankenphpworkernosingletongetinstance)
+  - [`NoRegisterShutdownFunctionRule` — `frankenphp.worker.noRegisterShutdownFunction`](#noregistershutdownfunctionrule--frankenphpworkernoregistershutdownfunction)
+  - [`NoSetErrorExceptionHandlerRule` — `frankenphp.worker.noSetErrorExceptionHandler`](#noseterrorexceptionhandlerrule--frankenphpworkernoseterrorexceptionhandler)
+  - [`NoChdirRule` — `frankenphp.worker.noChdir`](#nochdirrule--frankenphpworkernochdir)
+  - [`NoSetLocaleRule` — `frankenphp.worker.noSetLocale`](#nosetlocalerule--frankenphpworkernosetlocale)
+  - [`NoLocaleSetDefaultRule` — `frankenphp.worker.noLocaleSetDefault`](#nolocalesetdefaultrule--frankenphpworkernolocalesetdefault)
+  - [`NoDateDefaultTimezoneSetRule` — `frankenphp.worker.noDateDefaultTimezoneSet`](#nodatedefaulttimezonesetrule--frankenphpworkernodatedefaulttimezoneset)
+  - [`NoMbEncodingMutationRule` — `frankenphp.worker.noMbEncodingMutation`](#nombencodingmutationrule--frankenphpworkernombencodingmutation)
+  - [`NoErrorReportingMutationRule` — `frankenphp.worker.noErrorReportingMutation`](#noerrorreportingmutationrule--frankenphpworkernoerrorreportingmutation)
+  - [`NoUmaskRule` — `frankenphp.worker.noUmask`](#noumaskrule--frankenphpworkernoumask)
+  - [`NoMissingResetInterfaceRule` — `frankenphp.worker.noMissingResetInterface`](#nomissingresetinterfacerule--frankenphpworkernomissingresetinterface)
+- [Level 3 — Hardening](#level-3--hardening)
+  - [`NoUnlimitedExecutionTimeRule` — `frankenphp.hardening.noUnlimitedExecutionTime`](#nounlimitedexecutiontimerule--frankenphphardeningnounlimitedexecutiontime)
+  - [`NoUnlimitedMemoryRule` — `frankenphp.hardening.noUnlimitedMemory`](#nounlimitedmemoryrule--frankenphphardeningnounlimitedmemory)
+  - [`NoPcntlForkRule` — `frankenphp.hardening.noPcntlFork`](#nopcntlforkrule--frankenphphardeningnopcntlfork)
+  - [`NoBlockingSleepRule` — `frankenphp.hardening.noBlockingSleep`](#noblockingsleeprule--frankenphphardeningnoblockingsleep)
+  - [`NoRegisterTickFunctionRule` — `frankenphp.hardening.noRegisterTickFunction`](#noregistertickfunctionrule--frankenphphardeningnoregistertickfunction)
+  - [`NoPcntlSignalRule` — `frankenphp.hardening.noPcntlSignal`](#nopcntlsignalrule--frankenphphardeningnopcntlsignal)
+  - [`NoPosixProcessControlRule` — `frankenphp.hardening.noPosixProcessControl`](#noposixprocesscontrolrule--frankenphphardeningnoposixprocesscontrol)
+- [Identifiers](#identifiers)
+- [Ignoring a finding](#ignoring-a-finding)
+  - [CLI / Messenger / supervisors (pcntl & posix)](#cli--messenger--supervisors-pcntl--posix)
+  - [Known gap — dynamic `FuncCall`](#known-gap--dynamic-funccall)
+
 ## Application order
 
 Apply rulesets in this order. Do not enable worker rules until classic findings are resolved (or intentionally baselineed).
@@ -187,7 +227,6 @@ includes:
 **Fix:** Container services; implement `ResetInterface` when they hold request data.
 
 **Demo:** `demo/worker/bad/NoSingletonGetInstance.php` · good: `demo/worker/good/NoSingletonGetInstanceGood.php`
-
 
 ### `NoRegisterShutdownFunctionRule` — `frankenphp.worker.noRegisterShutdownFunction`
 

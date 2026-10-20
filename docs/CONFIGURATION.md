@@ -1,5 +1,14 @@
 # Configuration
 
+## Table of contents
+
+- [Phased rulesets (recommended)](#phased-rulesets-recommended)
+- [What `extension.neon` does](#what-extensionneon-does)
+- [Baselines](#baselines)
+- [ignoreErrors](#ignoreerrors)
+- [Paths](#paths)
+- [Worker strict mode](#worker-strict-mode)
+
 ## Phased rulesets (recommended)
 
 ```neon
@@ -58,7 +67,6 @@ parameters:
     excludePaths:
         - bin/legacy-migrator.php
 ```
-
 
 ## Worker strict mode
 

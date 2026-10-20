@@ -8,6 +8,15 @@
 | Method | Manual review of `src/`, neon rulesets, demos; rules aimed at apps running FrankenPHP worker with `FRANKENPHP_RESET_KERNEL` unset/false |
 | **Verdict** | Rulesets cover process/global/static leaks and (opt-in) missing `ResetInterface`. The extension itself never runs inside the HTTP worker. |
 
+## Table of contents
+
+- [Execution model assumed](#execution-model-assumed)
+- [Why the extension does not run in the worker](#why-the-extension-does-not-run-in-the-worker)
+- [What the rulesets enforce](#what-the-rulesets-enforce)
+- [Findings (extension itself)](#findings-extension-itself)
+  - [Residual limits (consumer apps)](#residual-limits-consumer-apps)
+- [Usage recommendations](#usage-recommendations)
+
 ## Execution model assumed
 
 FrankenPHP worker boots the Symfony kernel once per worker and serves many requests.

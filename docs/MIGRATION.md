@@ -1,5 +1,15 @@
 # Migration guide: PHP-FPM → FrankenPHP classic → worker
 
+## Table of contents
+
+- [Mental model](#mental-model)
+- [FPM compatibility (important)](#fpm-compatibility-important)
+- [Recommended sequence](#recommended-sequence)
+- [Symfony notes](#symfony-notes)
+- [Laravel notes](#laravel-notes)
+- [Verification with this package demos](#verification-with-this-package-demos)
+- [Worker lifecycle handlers](#worker-lifecycle-handlers)
+
 ## Mental model
 
 | Runtime | Process lifetime | What resets per request |

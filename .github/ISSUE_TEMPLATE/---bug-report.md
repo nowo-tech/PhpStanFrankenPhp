@@ -19,10 +19,9 @@ assignees: ''
 
 | Q                           | A
 | ----------------------------| -----------------------
-| `PhpStanFrankenPhp` version | x.y.z
+| `PhpStanFrankenPhp` version        | x.y.z
 | PHP version                 | x.y.z
-| PHPStan version             | x.y.z
-| Ruleset used                | classic / worker / worker-strict / hardening / all
+| Database                    | MySQL / PostgreSQL / SQLite / Other
 
 #### Summary
 
@@ -34,7 +33,7 @@ assignees: ''
 
 #### How to reproduce
 
-<!-- Provide steps to reproduce the bug (minimal PHP + phpstan.neon). -->
+<!-- Provide steps to reproduce the bug. -->
 
 #### Expected behavior
 

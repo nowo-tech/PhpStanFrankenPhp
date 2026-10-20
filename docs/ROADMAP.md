@@ -6,6 +6,15 @@ Current stable: **v1.2.3**.
 
 **Primary target:** FrankenPHP worker with `FRANKENPHP_RESET_KERNEL` unset/false (kernel reused + `services_resetter`).
 
+## Table of contents
+
+- [Principles](#principles)
+- [Shipped in 1.2.x](#shipped-in-12x)
+- [Near term (1.2.x / 1.3)](#near-term-12x--13)
+- [Medium term](#medium-term)
+- [Explicit non-goals (for now)](#explicit-non-goals-for-now)
+- [Feedback](#feedback)
+
 ## Principles
 
 - Prefer **stable identifiers** (`frankenphp.*`) over message churn.

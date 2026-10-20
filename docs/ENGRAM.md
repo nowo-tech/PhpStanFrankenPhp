@@ -2,6 +2,15 @@
 
 Persistent AI / maintainer memory for **PhpStanFrankenPhp**.
 
+## Table of contents
+
+- [Product intent](#product-intent)
+- [Non-goals](#non-goals)
+- [Ruleset levels](#ruleset-levels)
+- [Invariants](#invariants)
+- [Useful commands](#useful-commands)
+- [Spec-driven development](#spec-driven-development)
+
 ## Product intent
 
 Help teams migrate from PHP-FPM to FrankenPHP by detecting unsafe patterns in two steps (classic, then worker), plus an optional hardening level.
@@ -32,3 +41,7 @@ make test
 make demo-all
 make release-check
 ```
+
+## Spec-driven development
+
+Engram stores intent and invariants; it does not define behavior. Local `REQ-*` traceability, user stories, scope and validation commands live in [SPEC-DRIVEN-DEVELOPMENT.md](SPEC-DRIVEN-DEVELOPMENT.md); the Spec Kit baseline is described in [SPEC-KIT.md](SPEC-KIT.md).
