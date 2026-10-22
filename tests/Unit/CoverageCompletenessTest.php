@@ -43,6 +43,7 @@ use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Scalar\String_;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class CoverageCompletenessTest extends TestCase
@@ -83,9 +84,7 @@ final class CoverageCompletenessTest extends TestCase
         yield 'tick' => [new NoRegisterTickFunctionRule()];
     }
 
-    /**
-     * @dataProvider rulesProvider
-     */
+    #[DataProvider('rulesProvider')]
     public function testGetNodeTypeIsString(object $rule): void
     {
         self::assertInstanceOf(Rule::class, $rule);

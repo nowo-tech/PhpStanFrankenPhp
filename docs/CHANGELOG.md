@@ -25,6 +25,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Rector targets the PHP 8.2 floor (`PhpVersion::PHP_82`) (REQ-CS-003).
+- `docs/SECURITY.md`: attack surface, threat model, dependency policy and the AI security audit checklist row (REQ-SEC-001 / REQ-SEC-002); `docs/PSR.md` PSR-3 row describes the AST-only extension (REQ-CS-007).
+- Tests use `#[DataProvider]` instead of `@dataProvider` docblocks (REQ-TEST-010); new `Demo smoke` workflow (tags, weekly, manual) (REQ-TEST-011).
+- Demo: `composer.lock` / `symfony.lock` are tracked (REQ-DEMO-012); `make up` falls back to `.env.example` for the port (REQ-DEMO-005); DNS block commented (REQ-DEMO-009).
+- Cursor rule `20-twig-and-public-assets.mdc` added (states that Twig/public assets do not apply) (REQ-IDE-003).
+
+### Fixed
+
+- `.scripts/check-no-cursor-coauthor.sh` also runs inside git worktrees (`.git` file instead of directory).
+
 ## [1.3.1] - 2026-10-20
 
 Documentation: wave-1 REQ compliance (README, CONTRIBUTING, issue templates, Spec Kit inventory). See [UPGRADING](UPGRADING.md#to-131).

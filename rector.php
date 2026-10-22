@@ -19,7 +19,7 @@ return RectorConfig::configure()
         // wrong node kinds; instanceof guards must stay for early-return coverage.
         ReduceAlwaysFalseIfOrRector::class,
     ])
-    ->withPhpVersion(PhpVersion::PHP_81)
+    ->withPhpVersion(PhpVersion::PHP_82)
     ->withPreparedSets(
         deadCode: true,
         codeQuality: true,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace NowoTech\PhpStanFrankenPhp\Tests\Integration;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class RulesetWiringTest extends TestCase
@@ -25,9 +26,7 @@ final class RulesetWiringTest extends TestCase
         yield 'rules/hardening' => ['rules/hardening.neon'];
     }
 
-    /**
-     * @dataProvider neonFilesProvider
-     */
+    #[DataProvider('neonFilesProvider')]
     public function testNeonFileExistsAndIsReadable(string $relative): void
     {
         $path = \dirname(__DIR__, 2).'/'.$relative;

@@ -1,0 +1,10 @@
+---
+description: Twig and public assets (not applicable to this PHPStan extension)
+alwaysApply: false
+---
+
+This repository is a PHPStan extension: it ships no Twig templates, no Twig namespace and no public assets.
+
+- Do not add Twig, Stimulus or `Resources/public` files to `src/`.
+- The demo under `demo/symfony8` may use Twig for its pages, but it is not part of the published package.
+- If templates or assets are ever added, follow the Nowo bundle rules for Twig namespaces, overrides and asset packages before release.
