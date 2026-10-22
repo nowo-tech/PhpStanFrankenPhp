@@ -3,6 +3,7 @@
 ## Table of contents
 
 - [Unreleased](#unreleased)
+- [To 1.3.2](#to-132)
 - [To 1.3.1](#to-131)
 - [To 1.3.0](#to-130)
 - [To 1.2.3](#to-123)
@@ -21,6 +22,14 @@
 - [PHPStan major upgrades](#phpstan-major-upgrades)
 
 ## Unreleased
+
+## To 1.3.2
+
+From **1.3.1**:
+
+```bash
+composer update nowo-tech/phpstan-frankenphp
+```
 
 ## To 1.3.1
 
