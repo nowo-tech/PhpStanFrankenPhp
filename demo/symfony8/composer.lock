@@ -3284,7 +3284,7 @@
             "dist": {
                 "type": "path",
                 "url": "/var/phpstan-frankenphp",
-                "reference": "cad8f22c95fce4891436e2823b66b12d49aa4228"
+                "reference": "943010bc203ce403c4c6e808eadc9c2c868c7c49"
             },
             "require": {
                 "php": ">=8.2 <8.6",
