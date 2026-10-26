@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- README: standard badge line (REQ-DOCS-004) — the Symfony badge (7.4 | 8.0 | 8.1+, the Symfony versions the worker rules and the demo target) takes the sixth slot; the PHPStan 2.x badge moves after Coverage.
+
 ## [1.3.2] - 2026-10-22
 
 Rector PHP 8.2, security analysis, tracked demo lock, DataProvider attributes, demo smoke workflow. See [UPGRADING](UPGRADING.md#to-132).
