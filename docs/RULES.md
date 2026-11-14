@@ -36,6 +36,11 @@ Table of contents:
   - [`NoErrorReportingMutationRule` — `frankenphp.worker.noErrorReportingMutation`](#noerrorreportingmutationrule--frankenphpworkernoerrorreportingmutation)
   - [`NoUmaskRule` — `frankenphp.worker.noUmask`](#noumaskrule--frankenphpworkernoumask)
   - [`NoMissingResetInterfaceRule` — `frankenphp.worker.noMissingResetInterface`](#nomissingresetinterfacerule--frankenphpworkernomissingresetinterface)
+  - [Worker load readiness (opt-in)](#worker-load-readiness-opt-in)
+  - [`NoRollbackAfterNestedBeginRule` — `frankenphp.worker.noRollbackAfterNestedBegin`](#norollbackafternestedbeginrule--frankenphpworkernorollbackafternestedbegin)
+  - [`NoFlushInHandWrittenTransactionRule` — `frankenphp.worker.noFlushInHandWrittenTransaction`](#noflushinhandwrittentransactionrule--frankenphpworkernoflushinhandwrittentransaction)
+  - [`NoFlushWithoutClosedManagerRecoveryRule` — `frankenphp.worker.noFlushWithoutClosedManagerRecovery`](#noflushwithoutclosedmanagerrecoveryrule--frankenphpworkernoflushwithoutclosedmanagerrecovery)
+  - [`NoUnboundedRecursionRule` — `frankenphp.worker.noUnboundedRecursion`](#nounboundedrecursionrule--frankenphpworkernounboundedrecursion)
 - [Level 3 — Hardening](#level-3--hardening)
   - [`NoUnlimitedExecutionTimeRule` — `frankenphp.hardening.noUnlimitedExecutionTime`](#nounlimitedexecutiontimerule--frankenphphardeningnounlimitedexecutiontime)
   - [`NoUnlimitedMemoryRule` — `frankenphp.hardening.noUnlimitedMemory`](#nounlimitedmemoryrule--frankenphphardeningnounlimitedmemory)
@@ -59,6 +64,7 @@ Apply rulesets in this order. Do not enable worker rules until classic findings 
 | 2 | `ruleset-worker.neon` | Make application state safe when the process stays alive |
 | 2b (optional) | `ruleset-worker-strict.neon` | Also flag $_GET/$_POST/… (framework-only hygiene) |
 | 2c (recommended for kernel reuse) | `ruleset-worker-no-kernel-reset.neon` | Worker + missing `ResetInterface` when `FRANKENPHP_RESET_KERNEL` is unset/false |
+| 2d (optional, Doctrine apps under load) | `ruleset-worker-load.neon` | Worker + transactions that break under deadlocks and unbounded recursion ([details](#worker-load-readiness-opt-in)) |
 | 3 | `ruleset-hardening.neon` | Bound resources and remove thread-hostile APIs |
 
 **Target runtime:** FrankenPHP **worker** with **`FRANKENPHP_RESET_KERNEL` unset/false** (default): the Symfony kernel instance is reused; `services_resetter` still clears services that implement `ResetInterface`. Use step **2c** for that profile. Setting `FRANKENPHP_RESET_KERNEL=1` clones the kernel each request (slower) and is an escape hatch, not a substitute for fixing state.
@@ -347,6 +353,120 @@ includes:
 **Fix:** Implement `reset()`, keep the service stateless, or use request-scoped design.
 
 **Demo:** `demo/worker/bad/NoMissingResetInterface.php`, `demo/worker/bad/NoMissingResetInterfaceArrayWrite.php` · good: `demo/worker/good/NoMissingResetInterfaceGood.php`, `demo/worker/good/NoMissingResetInterfaceArrayWriteGood.php`
+
+---
+
+### Worker load readiness (opt-in)
+
+Four heuristic rules for Doctrine apps that serve concurrent writes from long-lived workers (Beacon spec 239). Background: in DBAL 4 a nested `Connection::rollBack()` runs `ROLLBACK TO SAVEPOINT` before it lowers the nesting level. On a MySQL deadlock (1213) the server rolls back the whole transaction and drops every savepoint, so that rollback fails with 1305, the nesting level is never lowered, and the worker's connection stays nested for every later request (only `Connection::close()` resets it). The caller sees 1305 instead of the deadlock, so nothing retries.
+
+All four are **off by default**, like `noMissingResetInterface`. Each has its own parameter:
+
+| Parameter | Rule | In `ruleset-worker-load.neon` |
+|-----------|------|:---:|
+| `flagRollbackAfterNestedBegin` | `NoRollbackAfterNestedBeginRule` | yes |
+| `flagFlushInHandWrittenTransaction` | `NoFlushInHandWrittenTransactionRule` | yes |
+| `flagFlushWithoutClosedManagerRecovery` | `NoFlushWithoutClosedManagerRecoveryRule` | no (noisy) |
+| `flagUnboundedRecursion` | `NoUnboundedRecursionRule` | yes |
+
+Enable them with `ruleset-worker-load.neon`, or — when you already include `rules.neon` or another ruleset that includes `ruleset-worker.neon` (PHPStan refuses a file included twice) — with the parameters:
+
+```neon
+parameters:
+    frankenphp:
+        flagRollbackAfterNestedBegin: true
+        flagFlushInHandWrittenTransaction: true
+        flagUnboundedRecursion: true
+        # flagFlushWithoutClosedManagerRecovery: true   # noisy: one finding per raw flush
+```
+
+**How Doctrine objects are recognised.** A receiver is an entity manager / DBAL connection when its PHPStan type is (or extends) `Doctrine\Persistence\ObjectManager`, `Doctrine\ORM\EntityManagerInterface` or `Doctrine\DBAL\Connection`. Local variables are followed through their first assignment (`$connection = $this->em->getConnection();`) and through parameters, closures included. When a declared class cannot be loaded (analysis without the vendor tree) its name decides (`…EntityManager`, `…ObjectManager`, `Doctrine\DBAL\…Connection`); a declared class with another name is not Doctrine. When there is no class type at all (untyped, `mixed`), the receiver name decides: `$em`, `$entityManager`, `$manager`, `getEntityManager()`, `getManager()`… for a manager, a name with `connection` / `conn` / `db` / `dbal` for a connection.
+
+**Scope.** Methods of classes, traits, interfaces and enums, and the closures inside them. Free functions and code outside classes are not analysed.
+
+---
+
+### `NoRollbackAfterNestedBeginRule` — `frankenphp.worker.noRollbackAfterNestedBegin`
+
+**Detects:** `rollBack()` / `rollback()` on a connection or entity manager inside a `catch` or `finally` of a `try` when
+- `beginTransaction()` runs in the same function before the `try` (the TaskBoard `TaskApiTransaction` / AuthKit `InvitationAcceptor` pattern), or
+- the `try` block calls `beginTransaction()`, `wrapInTransaction()` / `transactional()` or an ORM `flush()` (directly or through a `flush($entityManager)` helper).
+
+A rollback guarded by `if ($connection->isTransactionActive())` is still reported (the message says why: after the failed savepoint rollback the transaction is still active, at the wrong level).
+
+**Not reported:** a rollback inside its own `try` whose `catch` / `finally` calls `close()`; a rollback after a `close()` call in the same handler; a rollback under an `if` / `elseif` that checks `getTransactionNestingLevel()`; rollbacks in closures defined inside the handler; PDO / other non-Doctrine receivers.
+
+**Known false positives:** a hand-written transaction that is never called inside another transaction and never flushes the ORM inside it (the rollback then runs at level 1 and is safe); the rule cannot see the call graph. **Known false negatives:** the begin in a caller or another method; a `close()` in a sibling branch earlier in the handler counts as recovery.
+
+**Why:** see [Worker load readiness](#worker-load-readiness-opt-in): one deadlock produces a 1305 instead of a retryable deadlock and leaves the worker's connection nested for every later request.
+
+**Fix:** run the work through `TransactionRunnerInterface::run()` (or the DoctrineDeadlockRetryBundle runner), or close the connection when the rollback fails:
+
+```php
+} catch (\Throwable $e) {
+    try {
+        $connection->rollBack();
+    } catch (\Throwable) {
+        $connection->close(); // savepoint gone: reset the nesting level for the next request
+    }
+    throw $e;
+}
+```
+
+**Demo:** `demo/worker/bad/NoRollbackAfterNestedBegin.php` · good: `demo/worker/good/NoRollbackAfterNestedBeginGood.php`
+
+---
+
+### `NoFlushInHandWrittenTransactionRule` — `frankenphp.worker.noFlushInHandWrittenTransaction`
+
+**Detects:** an entity-manager `flush()` (or a `flush($entityManager)` helper such as a recovering flusher)
+- after a `beginTransaction()` in the same function and before a later `commit()` (or with no `commit()` after it), outside `catch` / `finally` blocks; or
+- in the body of a closure / arrow function passed directly to `wrapInTransaction()` / `transactional()` (UserKit `PersonalDataEraser` pattern). For `EntityManager::wrapInTransaction()` the message adds that it already flushes after the callable.
+
+**Not reported:** classes whose name or interfaces contain `TransactionRunner` (the runner owns the transaction); callables that are not closures (`$this->work(...)`, `[$this, 'work']`); flushes in a caller's callable (UptimeMonitor `TenantQuota::withTenantLock()` takes `$write` from its callers: the flush is not visible there).
+
+**Known false positives:** a flush between two unrelated begin/commit pairs when the positions overlap (rare). **Known false negatives:** flushes in methods called from inside the transaction, and transactions opened in a caller.
+
+**Why:** `flush()` opens its own transaction; inside another one it runs at nesting level 2 on a savepoint. After a deadlock the ORM's own rollback fails with 1305, so the deadlock is never retried and the connection stays nested.
+
+**Fix:** let the transaction owner flush once at the outer level — `TransactionRunnerInterface::run()`, or `wrapInTransaction()` without an inner flush — or move the flush out of the transaction.
+
+**Demo:** `demo/worker/bad/NoFlushInHandWrittenTransaction.php` · good: `demo/worker/good/NoFlushInHandWrittenTransactionGood.php`
+
+---
+
+### `NoFlushWithoutClosedManagerRecoveryRule` — `frankenphp.worker.noFlushWithoutClosedManagerRecovery`
+
+**Detects:** a direct `$entityManager->flush()` in a class that never recovers a closed entity manager: no `isOpen()` on an entity manager, no `resetManager()`, no `flush($entityManager)` helper, no call whose name contains `recover`, `reopen`, `ensureOpen` or `resetIfClosed` with an entity-manager argument, and no call on a dependency whose short class name contains `Recover`, `Flusher`, `TransactionRunner` or `DeadlockRetry`. One finding per raw flush (ChatKit `ChatService` pattern).
+
+**Skipped:** anonymous classes; classes whose short name ends with `Test`, `TestCase`, `Fixture(s)`, `Migration` or `Command`, or whose namespace has a `Tests`, `Test`, `Fixtures`, `DataFixtures`, `Migrations` or `Command` segment.
+
+**Opt-in only, not in `ruleset-worker-load.neon`:** the check is class-level, so it is noisy — a controller or service that flushes in every action gets one finding per flush, including apps where DoctrineBundle's `Registry::reset()` (run by `services_resetter`) may already replace a closed lazy manager between requests — though not within the request that closed it. It is useful for bundles that must not rely on the host resetting the manager, and to find the services that need a recovery helper. **Known false negatives:** a class with any recovery call is clean even if other methods flush raw.
+
+**Fix:** after a failed flush, `if (!$em->isOpen()) { $registry->resetManager(); }`, or flush through a recovering helper / `TransactionRunnerInterface`.
+
+**Demo:** `demo/worker/bad/NoFlushWithoutClosedManagerRecovery.php` · good: `demo/worker/good/NoFlushWithoutClosedManagerRecoveryGood.php`
+
+---
+
+### `NoUnboundedRecursionRule` — `frankenphp.worker.noUnboundedRecursion`
+
+**Detects:** recursion over a parent / child relation with no depth limit and no visited set:
+- a method that calls itself (`$this->m()`, `self::m()`, `static::m()`) with an argument that walks a relation, e.g. `foreach ($this->childrenOf($task) as $child) { $this->descendantsOf($child); }` (TaskBoard `TaskTree::descendantsOf()`);
+- a method that calls the same method on a related object (`$this->parent?->path()`, `$child->count()` in `foreach ($this->children as $child)`);
+- a closure assigned to a variable it captures by reference (`$walk = function ($node) use (&$walk) { … $walk($reply); }`).
+
+An expression walks a relation when it reads a property or calls a method whose name has one of the words child / children, parent(s), descendant(s), ancestor(s), reply / replies, subtask(s), subpage(s), subfolder(s), subcategory / subcategories, subcomment(s) — directly, or through the `foreach` variable bound to such an expression.
+
+**Not reported:** a method / closure with a parameter (or captured variable) whose name has one of the words depth, level, limit, max, remaining, visited, seen, budget, hops; recursion that does not walk a relation (`factorial($n - 1)`).
+
+**Known false positives:** trees whose shape is guaranteed acyclic and shallow by construction (e.g. built from a closure table with a depth limit elsewhere); a guard held in a property instead of a parameter. **Known false negatives:** mutual recursion (`a()` → `b()` → `a()`), relations named otherwise (`items`, `nodes`, `members`), recursion through `array_map()` callbacks, and `ClassName::m()` with the class written out.
+
+**Why:** a cycle in the data (a task that became its own ancestor) or a very deep tree recurses until the worker hits the memory limit or overflows the stack; on FrankenPHP the crash takes down the worker thread and every request it was serving.
+
+**Fix:** pass a depth counter and stop at a maximum, pass a visited set, or walk iteratively with an explicit stack.
+
+**Demo:** `demo/worker/bad/NoUnboundedRecursion.php` · good: `demo/worker/good/NoUnboundedRecursionGood.php`
 
 ---
 

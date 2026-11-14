@@ -26,8 +26,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Worker load readiness (opt-in, Beacon spec 239):** four heuristic rules for Doctrine apps served by long-lived workers, all off by default (see [RULES.md](RULES.md#worker-load-readiness-opt-in)):
+  - `NoRollbackAfterNestedBeginRule` (`frankenphp.worker.noRollbackAfterNestedBegin`, parameter `flagRollbackAfterNestedBegin`) — `rollBack()` in a catch/finally after `beginTransaction()`, or after a begin / `wrapInTransaction()` / `transactional()` / ORM `flush()` in the try, including the `isTransactionActive()`-guarded form. In DBAL 4 such a rollback fails with 1305 after a deadlock and leaves the connection nested.
+  - `NoFlushInHandWrittenTransactionRule` (`frankenphp.worker.noFlushInHandWrittenTransaction`, `flagFlushInHandWrittenTransaction`) — `EntityManager::flush()` (or a `flush($em)` helper) inside `beginTransaction()`…`commit()` or inside a `wrapInTransaction()` / `transactional()` closure; `*TransactionRunner*` classes are skipped.
+  - `NoFlushWithoutClosedManagerRecoveryRule` (`frankenphp.worker.noFlushWithoutClosedManagerRecovery`, `flagFlushWithoutClosedManagerRecovery`) — raw `flush()` in a class with no `isOpen()` / `resetManager()` / recovering helper. Noisy, so it is not part of the new ruleset.
+  - `NoUnboundedRecursionRule` (`frankenphp.worker.noUnboundedRecursion`, `flagUnboundedRecursion`) — recursion over children / parent / descendants / replies / subtasks … with no depth parameter and no visited set.
+- `ruleset-worker-load.neon`: includes `ruleset-worker.neon` and enables the rollback, flush-in-transaction and recursion rules. Users of `rules.neon` set the parameters instead (see [CONFIGURATION.md](CONFIGURATION.md#worker-load-readiness)).
+- Demos `demo/worker/{bad,good}/No{RollbackAfterNestedBegin,FlushInHandWrittenTransaction,FlushWithoutClosedManagerRecovery,UnboundedRecursion}*.php`, `composer demo-worker-load` / `demo-worker-load-good` (CI and `make release-check-demos`).
+- Dev dependencies `doctrine/orm` and `doctrine/dbal` (test fixtures and demos only; the extension itself still requires only PHPStan).
+
 ### Changed
 
+- `phpunit.xml.dist` raises `memory_limit` to 1G for the test run (the Doctrine fixtures need more than the php-cli default of 128M).
 - README: standard badge line (REQ-DOCS-004) — the Symfony badge (7.4 | 8.0 | 8.1+, the Symfony versions the worker rules and the demo target) takes the sixth slot; the PHPStan 2.x badge moves after Coverage.
 
 ## [1.3.2] - 2026-10-22

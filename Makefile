@@ -18,7 +18,8 @@ SERVICE_PHP ?= php
 	composer-sync clean update validate setup-hooks \
 	demo-classic demo-worker demo-hardening demo-all \
 	demo-classic-good demo-worker-good demo-hardening-good demo-worker-strict \
-	demo-worker-no-kernel-reset demo-worker-no-kernel-reset-good
+	demo-worker-no-kernel-reset demo-worker-no-kernel-reset-good \
+	demo-worker-load demo-worker-load-good
 
 help:
 	@echo "PhpStanFrankenPhp — make targets"
@@ -116,6 +117,14 @@ demo-worker-no-kernel-reset: ensure-up
 
 demo-worker-no-kernel-reset-good: ensure-up
 	@$(COMPOSE) exec -T $(SERVICE_PHP) composer demo-worker-no-kernel-reset-good
+	@$(COMPOSE) exec -T $(SERVICE_PHP) composer demo-worker-load-good
+
+demo-worker-load: ensure-up
+	@echo "=== Worker load-readiness demos (expect findings) ==="
+	@$(COMPOSE) exec -T $(SERVICE_PHP) composer demo-worker-load || true
+
+demo-worker-load-good: ensure-up
+	@$(COMPOSE) exec -T $(SERVICE_PHP) composer demo-worker-load-good
 
 demo-hardening-good: ensure-up
 	@$(COMPOSE) exec -T $(SERVICE_PHP) composer demo-hardening-good
@@ -143,11 +152,13 @@ release-check-demos:
 	@if $(COMPOSE) exec -T $(SERVICE_PHP) composer demo-worker; then echo "Expected findings on demo/worker/bad" >&2; exit 1; fi
 	@if $(COMPOSE) exec -T $(SERVICE_PHP) composer demo-hardening; then echo "Expected findings on demo/hardening/bad" >&2; exit 1; fi
 	@if $(COMPOSE) exec -T $(SERVICE_PHP) composer demo-worker-no-kernel-reset; then echo "Expected findings on no-kernel-reset demos" >&2; exit 1; fi
+	@if $(COMPOSE) exec -T $(SERVICE_PHP) composer demo-worker-load; then echo "Expected findings on worker load-readiness demos" >&2; exit 1; fi
 	@echo "=== Fixture demos: good samples must be clean ==="
 	@$(COMPOSE) exec -T $(SERVICE_PHP) composer demo-classic-good
 	@$(COMPOSE) exec -T $(SERVICE_PHP) composer demo-worker-good
 	@$(COMPOSE) exec -T $(SERVICE_PHP) composer demo-hardening-good
 	@$(COMPOSE) exec -T $(SERVICE_PHP) composer demo-worker-no-kernel-reset-good
+	@$(COMPOSE) exec -T $(SERVICE_PHP) composer demo-worker-load-good
 	@echo "=== Symfony 8 FrankenPHP smoke ==="
 	@$(MAKE) -C demo release-check
 

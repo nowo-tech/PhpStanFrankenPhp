@@ -67,7 +67,19 @@ FrankenPHP classic already changes process lifetime compared to FPM (`exit`/`die
 | 2 | [`ruleset-worker.neon`](ruleset-worker.neon) | Enabling FrankenPHP **worker** |
 | 2b | [`ruleset-worker-strict.neon`](ruleset-worker-strict.neon) | Optional: also flag `$_GET`/`$_POST`/… |
 | 2c | [`ruleset-worker-no-kernel-reset.neon`](ruleset-worker-no-kernel-reset.neon) | Recommended when `FRANKENPHP_RESET_KERNEL` unset/false |
+| 2d | [`ruleset-worker-load.neon`](ruleset-worker-load.neon) | Optional: Doctrine transactions that break under deadlocks, unbounded recursion |
 | 3 | [`ruleset-hardening.neon`](ruleset-hardening.neon) | Production hardening (timeouts, fork, sleep) |
+
+### Worker load-readiness rules (opt-in)
+
+Off by default; enable them with `ruleset-worker-load.neon` or, when you already include `rules.neon`, with the `frankenphp.flag*` parameters ([details](docs/RULES.md#worker-load-readiness-opt-in)).
+
+| Identifier | Flags | Parameter | In `ruleset-worker-load.neon` |
+|------------|-------|-----------|:---:|
+| `frankenphp.worker.noRollbackAfterNestedBegin` | `rollBack()` in a catch/finally after `beginTransaction()`, or after a begin / `wrapInTransaction()` / ORM `flush()` in the try (also when guarded by `isTransactionActive()`) | `flagRollbackAfterNestedBegin` | yes |
+| `frankenphp.worker.noFlushInHandWrittenTransaction` | `EntityManager::flush()` inside `beginTransaction()`…`commit()` or a `wrapInTransaction()` / `transactional()` closure | `flagFlushInHandWrittenTransaction` | yes |
+| `frankenphp.worker.noFlushWithoutClosedManagerRecovery` | raw `flush()` in a class with no closed-manager recovery (`isOpen()`, `resetManager()`, recovering helper) | `flagFlushWithoutClosedManagerRecovery` | no (noisy) |
+| `frankenphp.worker.noUnboundedRecursion` | recursion over children / parent / replies / … with no depth parameter and no visited set | `flagUnboundedRecursion` | yes |
 
 Full catalog: [docs/RULES.md](docs/RULES.md).
 

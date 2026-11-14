@@ -90,6 +90,13 @@ jobs:
             exit 1
           fi
 
+      - name: Demo worker load readiness (expect errors)
+        run: |
+          if composer demo-worker-load; then
+            echo "Expected findings on the worker load-readiness demos" >&2
+            exit 1
+          fi
+
       - name: Demo hardening (expect errors)
         run: |
           if composer demo-hardening; then
@@ -102,6 +109,7 @@ jobs:
           composer demo-classic-good
           composer demo-worker-good
           composer demo-hardening-good
+          composer demo-worker-load-good
 
   code-style-check:
     name: Code Style Check

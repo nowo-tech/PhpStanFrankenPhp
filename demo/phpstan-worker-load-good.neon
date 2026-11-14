@@ -1,0 +1,13 @@
+includes:
+    - ../extension.neon
+    - ../ruleset-worker-load.neon
+
+parameters:
+    level: 0
+    frankenphp:
+        flagFlushWithoutClosedManagerRecovery: true
+    paths:
+        - worker/good/NoRollbackAfterNestedBeginGood.php
+        - worker/good/NoFlushInHandWrittenTransactionGood.php
+        - worker/good/NoFlushWithoutClosedManagerRecoveryGood.php
+        - worker/good/NoUnboundedRecursionGood.php

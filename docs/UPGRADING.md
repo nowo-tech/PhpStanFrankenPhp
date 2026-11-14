@@ -23,6 +23,16 @@
 
 ## Unreleased
 
+No new findings unless you opt in: the four worker load-readiness rules are off by default.
+
+```bash
+composer update nowo-tech/phpstan-frankenphp
+```
+
+To adopt them, include `ruleset-worker-load.neon`, or — if you already include `rules.neon` or a ruleset that includes `ruleset-worker.neon` — set `frankenphp.flagRollbackAfterNestedBegin`, `flagFlushInHandWrittenTransaction` and `flagUnboundedRecursion` (and, optionally, the noisier `flagFlushWithoutClosedManagerRecovery`) to `true` in your `phpstan.neon`. Expect findings on hand-written Doctrine transactions; fix them or baseline them. See [CONFIGURATION.md](CONFIGURATION.md#worker-load-readiness).
+
+If your own PHPStan configuration declares `parametersSchema` for `frankenphp`, it now has four more keys (all `bool`).
+
 ## To 1.3.2
 
 From **1.3.1**:
