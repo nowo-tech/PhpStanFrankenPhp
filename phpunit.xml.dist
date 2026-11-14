@@ -10,6 +10,11 @@
          failOnDeprecation="false"
          failOnWarning="false"
          displayDetailsOnTestsThatTriggerWarnings="true">
+    <php>
+        <!-- The rule tests load the Doctrine ORM / DBAL reflection; 128M (php-cli default) is not enough. -->
+        <ini name="memory_limit" value="1G"/>
+    </php>
+
     <testsuites>
         <testsuite name="rules">
             <directory>tests/Rule</directory>
