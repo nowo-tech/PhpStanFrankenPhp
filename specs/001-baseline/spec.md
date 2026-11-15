@@ -42,7 +42,9 @@ As a platform engineer, I optionally enable **hardening** rules to block fork, u
 | ID | Requirement |
 |----|-------------|
 | FR-RULESET-001 | Package type `phpstan-extension`; rules grouped in classic, worker, and hardening neon entrypoints; `extension.neon` does not auto-enable rules |
+| FR-RULESET-002 | `phpstan/phpstan` floor `^2.1.26` (FR-SUP-002 uses `Type::hasInstanceProperty()`); CI runs a PHP 8.2 prefer-lowest job |
 | FR-SUP-001 | `NodeHelper` provides shared AST inspection utilities for rules |
+| FR-SUP-002 | `AstFinder` walks function bodies without entering nested functions; `DoctrineExprResolver` tells entity managers / DBAL connections apart from PHPStan types, declared class names (classes not loadable) or receiver names (untyped) |
 
 ### Classic rules
 
@@ -75,6 +77,11 @@ As a platform engineer, I optionally enable **hardening** rules to block fork, u
 | FR-WRK-015 | `NoUmaskRule` flags `umask(...)` mutations |
 | FR-WRK-016 | `NoLocaleSetDefaultRule` flags `locale_set_default()` / `Locale::setDefault()` |
 | FR-WRK-017 | `NoMissingResetInterfaceRule` (opt-in) flags mutable `$this` state without `ResetInterface`, including writes through array elements (`$this->items[$k] = …`, `[] =`, assign-ops, inc/dec, `unset`) and nested properties (`$this->obj->prop = …`, `=&`); reads and method calls on the property are not reported; heuristic skips include Form helpers (`*Form`, `*FormType`, `*TypeExtension`, `*DataTransformer`, `*DataMapper`, `/form/` `/forms/` FQCN fragments) |
+| FR-WRK-018 | `NoRollbackAfterNestedBeginRule` (opt-in, `flagRollbackAfterNestedBegin`) flags `rollBack()` in a catch / finally after a `beginTransaction()` before the try, or after `beginTransaction()` / `wrapInTransaction()` / `transactional()` / an ORM flush inside the try; also when guarded by `isTransactionActive()`; not when the rollback is wrapped in a try that closes the DBAL connection, follows such a `close()`, or sits under a `getTransactionNestingLevel()` comparison that pins level 1 (`=== 1`, `== 1`, `<= 1`, `< 2`); other nesting-level tests are reported like `isTransactionActive()` (Beacon spec 239, audit QB) |
+| FR-WRK-019 | `NoFlushInHandWrittenTransactionRule` (opt-in, `flagFlushInHandWrittenTransaction`) flags an entity-manager flush (direct or `flush($em)` helper) between `beginTransaction()` and the first `commit()` after it, outside catch / finally, or inside a closure passed to `wrapInTransaction()` / `transactional()`; classes named / implementing `*TransactionRunner*` are skipped (Beacon spec 239) |
+| FR-WRK-020 | `NoFlushWithoutClosedManagerRecoveryRule` (opt-in, `flagFlushWithoutClosedManagerRecovery`, not in `ruleset-worker-load.neon`) flags direct entity-manager flushes in a class with no `isOpen()` on a manager, no `resetManager()`, no `flush($em)` / `recover…($em)` helper and no recovering dependency; tests, fixtures, migrations and Symfony Console commands (subclass of `Command` or `#[AsCommand]`) are skipped; CQRS `Command` namespaces are analysed (Beacon spec 239, audit QB) |
+| FR-WRK-021 | `NoUnboundedRecursionRule` (opt-in, `flagUnboundedRecursion`) flags a method (or self-capturing closure) that recurses over a relation (child/children, parent, descendant, ancestor, reply/replies, subtask, subpage, subfolder, subcategory, subcomment) with no guard parameter / captured variable (depth, level, limit, max, remaining, visited, seen, budget, hops) (Beacon spec 239) |
+| FR-WRK-022 | `ruleset-worker-load.neon` includes `ruleset-worker.neon` and enables FR-WRK-018, FR-WRK-019 and FR-WRK-021 |
 
 ### Hardening rules
 

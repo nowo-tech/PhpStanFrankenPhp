@@ -11,6 +11,8 @@ Every production PHP file under `src/` is mapped below. Tests under `tests/` and
 | Source file | Spec section | Requirement IDs |
 | --- | --- | --- |
 | `Support/NodeHelper.php` | Shared AST helpers for rules | FR-SUP-001 |
+| `Support/AstFinder.php` | Function-body walker, call names, identifier tokens | FR-SUP-002 |
+| `Support/DoctrineExprResolver.php` | Entity manager / DBAL connection detection | FR-SUP-002 |
 
 ## Classic rules (`src/Rule/Classic`)
 
@@ -43,6 +45,10 @@ Every production PHP file under `src/` is mapped below. Tests under `tests/` and
 | `Rule/Worker/NoErrorReportingMutationRule.php` | Worker — no error_reporting mutation | FR-WRK-014 |
 | `Rule/Worker/NoUmaskRule.php` | Worker — no umask mutation | FR-WRK-015 |
 | `Rule/Worker/NoMissingResetInterfaceRule.php` | Worker — missing ResetInterface (opt-in); array/nested writes | FR-WRK-017 |
+| `Rule/Worker/NoRollbackAfterNestedBeginRule.php` | Worker — rollBack() after a nested begin / flush (opt-in) | FR-WRK-018 |
+| `Rule/Worker/NoFlushInHandWrittenTransactionRule.php` | Worker — flush inside a hand-written transaction (opt-in) | FR-WRK-019 |
+| `Rule/Worker/NoFlushWithoutClosedManagerRecoveryRule.php` | Worker — raw flush without closed-manager recovery (opt-in, noisy) | FR-WRK-020 |
+| `Rule/Worker/NoUnboundedRecursionRule.php` | Worker — recursion over a relation without depth / visited guard (opt-in) | FR-WRK-021 |
 
 ## Hardening rules (`src/Rule/Hardening`)
 
@@ -60,11 +66,11 @@ Every production PHP file under `src/` is mapped below. Tests under `tests/` and
 
 | Category | Files | Mapped |
 | --- | ---: | ---: |
-| Support utilities | 1 | 1 |
+| Support utilities | 3 | 3 |
 | Classic rules | 5 | 5 |
-| Worker rules | 17 | 17 |
+| Worker rules | 21 | 21 |
 | Hardening rules | 7 | 7 |
-| **Total production sources (`src/`)** | **30** | **30** |
+| **Total production sources (`src/`)** | **36** | **36** |
 
 ## Out of `src/` (documented in spec, not inventory rows)
 

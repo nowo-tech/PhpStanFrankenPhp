@@ -31,11 +31,13 @@ Intentional violations (`bad/`) and compliant counterparts (`good/`) for each mi
 composer demo-classic
 composer demo-worker
 composer demo-worker-strict
+composer demo-worker-load
 composer demo-hardening
 
 composer demo-classic-good
 composer demo-worker-good
 composer demo-hardening-good
+composer demo-worker-load-good
 ```
 
 `*-good` targets must exit 0. `bad/` analyses must report findings.
@@ -75,6 +77,10 @@ Overview sample: `SafeRequestHandler.php`.
 | `NoErrorReportingMutation.php` | `frankenphp.worker.noErrorReportingMutation` | `NoErrorReportingMutationGood.php` |
 | `NoUmask.php` | `frankenphp.worker.noUmask` | `NoUmaskGood.php` |
 | `NoMissingResetInterface.php` | `frankenphp.worker.noMissingResetInterface` (via `ruleset-worker-no-kernel-reset.neon`) | `NoMissingResetInterfaceGood.php` |
+| `NoRollbackAfterNestedBegin.php` | `frankenphp.worker.noRollbackAfterNestedBegin` (via `ruleset-worker-load.neon`) | `NoRollbackAfterNestedBeginGood.php` |
+| `NoFlushInHandWrittenTransaction.php` | `frankenphp.worker.noFlushInHandWrittenTransaction` (via `ruleset-worker-load.neon`) | `NoFlushInHandWrittenTransactionGood.php` |
+| `NoFlushWithoutClosedManagerRecovery.php` | `frankenphp.worker.noFlushWithoutClosedManagerRecovery` (parameter `flagFlushWithoutClosedManagerRecovery`) | `NoFlushWithoutClosedManagerRecoveryGood.php` |
+| `NoUnboundedRecursion.php` | `frankenphp.worker.noUnboundedRecursion` (via `ruleset-worker-load.neon`) | `NoUnboundedRecursionGood.php` |
 
 Overview sample: `RequestScopedService.php`.
 

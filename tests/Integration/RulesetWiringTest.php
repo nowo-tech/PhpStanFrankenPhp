@@ -19,6 +19,7 @@ final class RulesetWiringTest extends TestCase
         yield 'worker' => ['ruleset-worker.neon'];
         yield 'worker-strict' => ['ruleset-worker-strict.neon'];
         yield 'worker-no-kernel-reset' => ['ruleset-worker-no-kernel-reset.neon'];
+        yield 'worker-load' => ['ruleset-worker-load.neon'];
         yield 'hardening' => ['ruleset-hardening.neon'];
         yield 'all' => ['rules.neon'];
         yield 'rules/classic' => ['rules/classic.neon'];
@@ -51,6 +52,14 @@ final class RulesetWiringTest extends TestCase
         self::assertStringContainsString('NoMissingResetInterfaceRule', $contents);
         self::assertStringContainsString('flagRequestSuperglobals', $contents);
         self::assertStringContainsString('flagMissingResetInterface', $contents);
+        self::assertStringContainsString('NoRollbackAfterNestedBeginRule', $contents);
+        self::assertStringContainsString('NoFlushInHandWrittenTransactionRule', $contents);
+        self::assertStringContainsString('NoFlushWithoutClosedManagerRecoveryRule', $contents);
+        self::assertStringContainsString('NoUnboundedRecursionRule', $contents);
+        self::assertStringContainsString('flagRollbackAfterNestedBegin: false', $contents);
+        self::assertStringContainsString('flagFlushInHandWrittenTransaction: false', $contents);
+        self::assertStringContainsString('flagFlushWithoutClosedManagerRecovery: false', $contents);
+        self::assertStringContainsString('flagUnboundedRecursion: false', $contents);
     }
 
     public function testHardeningRulesetRegistersPcntlSignal(): void
@@ -66,11 +75,25 @@ final class RulesetWiringTest extends TestCase
         self::assertStringContainsString('parametersSchema', $contents);
         self::assertStringContainsString('flagRequestSuperglobals', $contents);
         self::assertStringContainsString('flagMissingResetInterface', $contents);
+        self::assertStringContainsString('flagRollbackAfterNestedBegin', $contents);
+        self::assertStringContainsString('flagFlushInHandWrittenTransaction', $contents);
+        self::assertStringContainsString('flagFlushWithoutClosedManagerRecovery', $contents);
+        self::assertStringContainsString('flagUnboundedRecursion', $contents);
     }
 
     public function testWorkerNoKernelResetRulesetEnablesMissingResetInterface(): void
     {
         $contents = (string) file_get_contents(\dirname(__DIR__, 2).'/ruleset-worker-no-kernel-reset.neon');
         self::assertStringContainsString('flagMissingResetInterface: true', $contents);
+    }
+
+    public function testWorkerLoadRulesetEnablesTheLoadRulesButNotTheRawFlushRule(): void
+    {
+        $contents = (string) file_get_contents(\dirname(__DIR__, 2).'/ruleset-worker-load.neon');
+        self::assertStringContainsString('ruleset-worker.neon', $contents);
+        self::assertStringContainsString('flagRollbackAfterNestedBegin: true', $contents);
+        self::assertStringContainsString('flagFlushInHandWrittenTransaction: true', $contents);
+        self::assertStringContainsString('flagUnboundedRecursion: true', $contents);
+        self::assertStringNotContainsString('flagFlushWithoutClosedManagerRecovery: true', $contents);
     }
 }

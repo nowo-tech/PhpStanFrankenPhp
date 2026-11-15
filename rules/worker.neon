@@ -6,6 +6,15 @@ parameters:
         flagRequestSuperglobals: false
         # When true, flag classes that mutate $this->… without ResetInterface (kernel reuse).
         flagMissingResetInterface: false
+        # Load readiness (opt-in, heuristic; ruleset-worker-load.neon enables the first, second and fourth).
+        # rollBack() in a catch/finally after a nested begin or flush (DBAL 4: 1305 after a deadlock, nesting stuck).
+        flagRollbackAfterNestedBegin: false
+        # EntityManager::flush() inside beginTransaction()…commit() or a wrapInTransaction()/transactional() callable.
+        flagFlushInHandWrittenTransaction: false
+        # Raw flush() in a class with no closed-EntityManager recovery (noisier: enable on its own).
+        flagFlushWithoutClosedManagerRecovery: false
+        # Recursion over children/parent/replies/… with no depth parameter and no visited set.
+        flagUnboundedRecursion: false
 
 services:
     -
@@ -78,5 +87,29 @@ services:
         class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoMissingResetInterfaceRule
         arguments:
             enabled: %frankenphp.flagMissingResetInterface%
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoRollbackAfterNestedBeginRule
+        arguments:
+            enabled: %frankenphp.flagRollbackAfterNestedBegin%
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoFlushInHandWrittenTransactionRule
+        arguments:
+            enabled: %frankenphp.flagFlushInHandWrittenTransaction%
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoFlushWithoutClosedManagerRecoveryRule
+        arguments:
+            enabled: %frankenphp.flagFlushWithoutClosedManagerRecovery%
+        tags:
+            - phpstan.rules.rule
+    -
+        class: NowoTech\PhpStanFrankenPhp\Rule\Worker\NoUnboundedRecursionRule
+        arguments:
+            enabled: %frankenphp.flagUnboundedRecursion%
         tags:
             - phpstan.rules.rule

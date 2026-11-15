@@ -4,6 +4,8 @@
 #     - vendor/nowo-tech/phpstan-frankenphp/ruleset-classic.neon
 # then later:
 #     - vendor/nowo-tech/phpstan-frankenphp/ruleset-worker.neon
+# optionally load readiness (transactions, recursion):
+#     - vendor/nowo-tech/phpstan-frankenphp/ruleset-worker-load.neon
 # optionally strict:
 #     - vendor/nowo-tech/phpstan-frankenphp/ruleset-worker-strict.neon
 # then:
@@ -16,11 +18,19 @@ parametersSchema:
     frankenphp: structure([
         flagRequestSuperglobals: bool()
         flagMissingResetInterface: bool()
+        flagRollbackAfterNestedBegin: bool()
+        flagFlushInHandWrittenTransaction: bool()
+        flagFlushWithoutClosedManagerRecovery: bool()
+        flagUnboundedRecursion: bool()
     ])
 
 parameters:
     frankenphp:
         flagRequestSuperglobals: false
         flagMissingResetInterface: false
+        flagRollbackAfterNestedBegin: false
+        flagFlushInHandWrittenTransaction: false
+        flagFlushWithoutClosedManagerRecovery: false
+        flagUnboundedRecursion: false
 
 services: []

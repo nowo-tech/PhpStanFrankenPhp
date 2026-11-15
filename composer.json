@@ -34,15 +34,18 @@
     ],
     "require": {
         "php": ">=8.2 <8.6",
-        "phpstan/phpstan": "^2.0"
+        "phpstan/phpstan": "^2.1.26"
     },
     "require-dev": {
+        "doctrine/dbal": "^4.2",
+        "doctrine/orm": "^3.3",
         "friendsofphp/php-cs-fixer": "^3.0",
         "igor-php/igor-php": "^0.10.0",
         "phpstan/phpstan-phpunit": "^2.0",
         "phpstan/phpstan-strict-rules": "^2.0",
         "phpunit/phpunit": "^10.0 || ^11.0",
         "rector/rector": "^2.0",
+        "symfony/console": "^6.4 || ^7.0 || ^8.0",
         "symfony/http-foundation": "^6.4 || ^7.0 || ^8.0",
         "symfony/process": "^6.4 || ^7.0 || ^8.0",
         "symfony/service-contracts": "^2.5 || ^3.0"
@@ -99,6 +102,8 @@
         "demo-worker-strict": "phpstan analyse -c demo/phpstan-worker-strict.neon --memory-limit=512M --error-format=table",
         "demo-worker-no-kernel-reset": "phpstan analyse -c demo/phpstan-worker-no-kernel-reset.neon --memory-limit=512M --error-format=table",
         "demo-worker-no-kernel-reset-good": "phpstan analyse -c demo/phpstan-worker-no-kernel-reset-good.neon --memory-limit=512M",
+        "demo-worker-load": "phpstan analyse -c demo/phpstan-worker-load.neon --memory-limit=512M --error-format=table",
+        "demo-worker-load-good": "phpstan analyse -c demo/phpstan-worker-load-good.neon --memory-limit=512M",
         "igor": "igor-php --no-agent ."
     },
     "scripts-descriptions": {
@@ -122,6 +127,8 @@
         "demo-worker-strict": "Analyse demos with worker-strict ruleset (also flags $_GET/$_POST/\u2026)",
         "demo-worker-no-kernel-reset": "Analyse demos for worker + missing ResetInterface (FRANKENPHP_RESET_KERNEL unset/false)",
         "demo-worker-no-kernel-reset-good": "Analyse compliant ResetInterface demos (must be clean)",
+        "demo-worker-load": "Analyse demos for the opt-in worker load-readiness rules (transactions, recursion)",
+        "demo-worker-load-good": "Analyse compliant load-readiness demos (must be clean)",
         "igor": "Run Igor FrankenPHP worker-state audit (REQ-CS-008)"
     },
     "config": {

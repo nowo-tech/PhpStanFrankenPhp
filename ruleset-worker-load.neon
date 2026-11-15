@@ -1,0 +1,14 @@
+# Optional worker load readiness: transactions that break under deadlocks and unbounded recursion.
+# Enables the opt-in rules for rollBack() after a nested begin, flush() inside a hand-written transaction
+# and recursion without a depth / visited guard. The noisier raw-flush rule stays off: set the
+# frankenphp.flagFlushWithoutClosedManagerRecovery parameter to enable it.
+# PHPStan refuses a file included twice: if you already include rules.neon (or another ruleset that
+# includes ruleset-worker.neon), set the parameters below in your own phpstan.neon instead.
+includes:
+    - ruleset-worker.neon
+
+parameters:
+    frankenphp:
+        flagRollbackAfterNestedBegin: true
+        flagFlushInHandWrittenTransaction: true
+        flagUnboundedRecursion: true
