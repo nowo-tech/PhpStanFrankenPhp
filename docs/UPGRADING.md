@@ -3,6 +3,7 @@
 ## Table of contents
 
 - [Unreleased](#unreleased)
+- [To 1.4.0](#to-140)
 - [To 1.3.2](#to-132)
 - [To 1.3.1](#to-131)
 - [To 1.3.0](#to-130)
@@ -22,6 +23,14 @@
 - [PHPStan major upgrades](#phpstan-major-upgrades)
 
 ## Unreleased
+
+## To 1.4.0
+
+From **1.3.2**:
+
+```bash
+composer update nowo-tech/phpstan-frankenphp
+```
 
 No new findings unless you opt in: the four worker load-readiness rules are off by default.
 
