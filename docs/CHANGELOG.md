@@ -35,10 +35,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `NoUnboundedRecursionRule` (`frankenphp.worker.noUnboundedRecursion`, `flagUnboundedRecursion`) — recursion over children / parent / descendants / replies / subtasks … with no depth parameter and no visited set.
 - `ruleset-worker-load.neon`: includes `ruleset-worker.neon` and enables the rollback, flush-in-transaction and recursion rules. Users of `rules.neon` set the parameters instead (see [CONFIGURATION.md](CONFIGURATION.md#worker-load-readiness)).
 - Demos `demo/worker/{bad,good}/No{RollbackAfterNestedBegin,FlushInHandWrittenTransaction,FlushWithoutClosedManagerRecovery,UnboundedRecursion}*.php`, `composer demo-worker-load` / `demo-worker-load-good` (CI and `make release-check-demos`).
-- Dev dependencies `doctrine/orm` and `doctrine/dbal` (test fixtures and demos only; the extension itself still requires only PHPStan).
+- Dev dependencies `doctrine/orm`, `doctrine/dbal` and `symfony/console` (test fixtures and demos only; the extension itself still requires only PHPStan).
+- CI: a PHP 8.2 `--prefer-lowest` job runs the test suite against the lowest allowed PHPStan, Doctrine and Symfony versions.
 
 ### Changed
 
+- **PHPStan floor raised to `^2.1.26`** (was `^2.0`): the new rules use `Type::hasInstanceProperty()` / `getInstanceProperty()`, which PHPStan added in 2.1.26.
 - `phpunit.xml.dist` raises `memory_limit` to 1G for the test run (the Doctrine fixtures need more than the php-cli default of 128M).
 - README: standard badge line (REQ-DOCS-004) — the Symfony badge (7.4 | 8.0 | 8.1+, the Symfony versions the worker rules and the demo target) takes the sixth slot; the PHPStan 2.x badge moves after Coverage.
 

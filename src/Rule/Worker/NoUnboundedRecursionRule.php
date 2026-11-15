@@ -22,7 +22,7 @@ use PhpParser\Node\Param;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Foreach_;
 use PHPStan\Analyser\Scope;
-use PHPStan\Node\InClassNode;
+use PHPStan\Node\InClassMethodNode;
 use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
@@ -48,7 +48,9 @@ use PHPStan\Rules\RuleErrorBuilder;
  *
  * Enable via `frankenphp.flagUnboundedRecursion: true` or `ruleset-worker-load.neon`.
  *
- * @implements Rule<InClassNode>
+ * Runs per method (`InClassMethodNode`): trait methods are analysed in each using class.
+ *
+ * @implements Rule<InClassMethodNode>
  */
 final class NoUnboundedRecursionRule implements Rule
 {
@@ -69,7 +71,7 @@ final class NoUnboundedRecursionRule implements Rule
 
     public function getNodeType(): string
     {
-        return InClassNode::class;
+        return InClassMethodNode::class;
     }
 
     public function processNode(Node $node, Scope $scope): array
@@ -79,10 +81,8 @@ final class NoUnboundedRecursionRule implements Rule
         }
 
         $errors = [];
-        foreach ($node->getOriginalNode()->getMethods() as $method) {
-            $this->checkMethod($method, $errors);
-            $this->checkClosures($method, $errors);
-        }
+        $this->checkMethod($node->getOriginalNode(), $errors);
+        $this->checkClosures($node->getOriginalNode(), $errors);
 
         return $errors;
     }

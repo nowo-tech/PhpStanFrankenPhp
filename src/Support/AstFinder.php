@@ -24,8 +24,9 @@ final class AstFinder
 {
     /**
      * Every node under `$nodes` (the roots included) accepted by `$filter`. Nested functions,
-     * closures, arrow functions and classes are not entered unless `$enterFunctions` is true
-     * (the nested node itself is still offered to `$filter`).
+     * closures and arrow functions are not entered unless `$enterFunctions` is true; nested
+     * classes (anonymous ones included) are never entered: PHPStan analyses them on their own.
+     * A nested node that is not entered is still offered to `$filter`.
      *
      * @param Node|array<mixed>    $nodes  nodes or (nested) lists of nodes
      * @param callable(Node): bool $filter
@@ -39,7 +40,7 @@ final class AstFinder
             if ($filter($node)) {
                 $found[] = $node;
             }
-            if (!$isRoot && !$enterFunctions && ($node instanceof FunctionLike || $node instanceof ClassLike)) {
+            if (!$isRoot && ($node instanceof ClassLike || (!$enterFunctions && $node instanceof FunctionLike))) {
                 return;
             }
             foreach ($node->getSubNodeNames() as $name) {
@@ -85,12 +86,13 @@ final class AstFinder
     }
 
     /**
-     * Lower-cased name of a method / nullsafe method / static call with a literal name, else null.
+     * Lower-cased name of a method / nullsafe method / static call with a literal name, else null
+     * (also null for a first-class callable such as `$em->flush(...)`: nothing is called).
      */
     public static function callName(Node $node): ?string
     {
         if (($node instanceof MethodCall || $node instanceof NullsafeMethodCall || $node instanceof StaticCall)
-            && $node->name instanceof Identifier
+            && $node->name instanceof Identifier && !$node->isFirstClassCallable()
         ) {
             return $node->name->toLowerString();
         }

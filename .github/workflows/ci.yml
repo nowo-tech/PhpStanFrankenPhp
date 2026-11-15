@@ -111,6 +111,30 @@ jobs:
           composer demo-hardening-good
           composer demo-worker-load-good
 
+  prefer-lowest:
+    name: PHP 8.2 (prefer-lowest)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: json
+          coverage: none
+          tools: composer:v2
+
+      - name: Install lowest dependencies
+        run: |
+          composer config --unset platform.php
+          composer update --prefer-lowest --prefer-stable --no-interaction --prefer-dist --no-progress
+
+      - name: Run tests (lowest PHPStan / Doctrine / Symfony)
+        run: composer test
+
   code-style-check:
     name: Code Style Check
     runs-on: ubuntu-latest

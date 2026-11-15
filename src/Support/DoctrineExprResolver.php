@@ -183,13 +183,20 @@ final class DoctrineExprResolver
      */
     public function isTransactional(Expr $receiver): bool
     {
-        $kind = $this->kindOf($receiver);
-        if (self::KIND_UNKNOWN !== $kind) {
-            return self::KIND_OTHER !== $kind;
-        }
-        $tokens = AstFinder::tokens((string) AstFinder::terminalName($receiver));
+        return $this->isConnection($receiver) || $this->isManager($receiver);
+    }
 
-        return [] !== array_intersect($tokens, self::CONNECTION_NAME_TOKENS) || $this->isManager($receiver);
+    /**
+     * Whether `$expr` is a DBAL connection (typed as one, or untyped with a connection-like name).
+     */
+    public function isConnection(Expr $expr): bool
+    {
+        $kind = $this->kindOf($expr);
+        if (self::KIND_UNKNOWN !== $kind) {
+            return self::KIND_CONNECTION === $kind;
+        }
+
+        return [] !== array_intersect(AstFinder::tokens((string) AstFinder::terminalName($expr)), self::CONNECTION_NAME_TOKENS);
     }
 
     /**

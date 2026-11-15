@@ -25,8 +25,10 @@
 
 No new findings unless you opt in: the four worker load-readiness rules are off by default.
 
+**PHPStan ≥ 2.1.26 is now required** (was `^2.0`). Composer updates PHPStan with the package if your constraint allows it:
+
 ```bash
-composer update nowo-tech/phpstan-frankenphp
+composer update nowo-tech/phpstan-frankenphp phpstan/phpstan --with-all-dependencies
 ```
 
 To adopt them, include `ruleset-worker-load.neon`, or — if you already include `rules.neon` or a ruleset that includes `ruleset-worker.neon` — set `frankenphp.flagRollbackAfterNestedBegin`, `flagFlushInHandWrittenTransaction` and `flagUnboundedRecursion` (and, optionally, the noisier `flagFlushWithoutClosedManagerRecovery`) to `true` in your `phpstan.neon`. Expect findings on hand-written Doctrine transactions; fix them or baseline them. See [CONFIGURATION.md](CONFIGURATION.md#worker-load-readiness).

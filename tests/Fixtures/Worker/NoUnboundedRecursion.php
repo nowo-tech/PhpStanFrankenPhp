@@ -173,3 +173,33 @@ final class Replies
         return [] === $seen ? [] : [(string) $constant(1)];
     }
 }
+
+trait WalksParentsTrait
+{
+    public function rootId(Task $task): string
+    {
+        $parent = $task->getParent();
+
+        return null === $parent ? $task->getId() : $this->rootId($task->getParent()); // error: trait methods are analysed
+    }
+}
+
+final class UsesWalksParentsTrait
+{
+    use WalksParentsTrait;
+
+    public function anonymous(): object
+    {
+        return new class {
+            public function size(Task $task): int
+            {
+                $size = 1;
+                foreach ($task->getChildren() as $child) {
+                    $size += $this->size($child); // error (reported once)
+                }
+
+                return $size;
+            }
+        };
+    }
+}

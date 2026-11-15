@@ -255,3 +255,137 @@ final class ClosureBody
         };
     }
 }
+
+// Audit QB: nesting-level guards, unrelated close() calls, traits, anonymous classes.
+final class AuditQbCases
+{
+    private int $entry = 0;
+
+    public function __construct(
+        private Connection $conn,
+        private EntityManagerInterface $em,
+    ) {
+    }
+
+    public function entryLevelRepair(): void
+    {
+        $level = $this->conn->getTransactionNestingLevel();
+        $this->conn->beginTransaction();
+        try {
+            $this->conn->commit();
+        } catch (Throwable $e) {
+            try {
+                while ($this->conn->getTransactionNestingLevel() > $level) {
+                    $this->conn->rollBack(); // fine: back to the entry level, close() if that fails
+                }
+            } catch (Throwable) {
+                $this->conn->close();
+            }
+
+            throw $e;
+        }
+    }
+
+    public function nestingGuard(): void
+    {
+        $this->conn->beginTransaction();
+        try {
+            $this->conn->commit();
+        } catch (Throwable $e) {
+            if ($this->conn->getTransactionNestingLevel() > 0) {
+                $this->conn->rollBack(); // error: > 0 is the isTransactionActive() guard
+            }
+            if ($this->conn->getTransactionNestingLevel() <= 1) {
+                $this->conn->rollBack(); // fine: level 1 only
+            }
+            if (2 > $this->conn->getTransactionNestingLevel()) {
+                $this->conn->rollBack(); // fine: level 1 only
+            }
+            if ($this->conn->getTransactionNestingLevel() !== 2) {
+                $this->conn->rollBack(); // error: does not pin level 1
+            }
+            if ($this->conn->getTransactionNestingLevel() > $this->entry) {
+                $this->conn->rollBack(); // error: one level down, still a savepoint rollback
+            }
+
+            throw $e;
+        }
+    }
+
+    public function unrelatedClose(object $file): void
+    {
+        $this->conn->beginTransaction();
+        try {
+            $this->conn->commit();
+        } catch (Throwable $e) {
+            $file->close();
+            $this->conn->rollBack(); // error: closing a file does not reset the connection
+
+            throw $e;
+        }
+    }
+
+    public function managerClose(): void
+    {
+        $this->conn->beginTransaction();
+        try {
+            $this->conn->commit();
+        } catch (Throwable $e) {
+            try {
+                $this->conn->rollBack(); // error: EntityManager::close() keeps the connection nested
+            } catch (Throwable) {
+                $this->em->close();
+            }
+
+            throw $e;
+        }
+    }
+
+    public function anonymous(): object
+    {
+        return new class($this->conn) {
+            public function __construct(
+                private Connection $conn,
+            ) {
+            }
+
+            public function go(): void
+            {
+                $this->conn->beginTransaction();
+                try {
+                    $this->conn->commit();
+                } catch (Throwable $e) {
+                    $this->conn->rollBack(); // error (reported once)
+
+                    throw $e;
+                }
+            }
+        };
+    }
+}
+
+trait RollsBackTrait
+{
+    public function save(EntityManagerInterface $em): void
+    {
+        $em->getConnection()->beginTransaction();
+        try {
+            $em->flush();
+            $em->getConnection()->commit();
+        } catch (Throwable $e) {
+            $em->getConnection()->rollBack(); // error: trait methods are analysed
+
+            throw $e;
+        }
+    }
+}
+
+final class UsesRollsBackTrait
+{
+    use RollsBackTrait;
+}
+
+final class AlsoUsesRollsBackTrait
+{
+    use RollsBackTrait;
+}

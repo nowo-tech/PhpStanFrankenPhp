@@ -382,7 +382,9 @@ parameters:
 
 **How Doctrine objects are recognised.** A receiver is an entity manager / DBAL connection when its PHPStan type is (or extends) `Doctrine\Persistence\ObjectManager`, `Doctrine\ORM\EntityManagerInterface` or `Doctrine\DBAL\Connection`. Local variables are followed through their first assignment (`$connection = $this->em->getConnection();`) and through parameters, closures included. When a declared class cannot be loaded (analysis without the vendor tree) its name decides (`…EntityManager`, `…ObjectManager`, `Doctrine\DBAL\…Connection`); a declared class with another name is not Doctrine. When there is no class type at all (untyped, `mixed`), the receiver name decides: `$em`, `$entityManager`, `$manager`, `getEntityManager()`, `getManager()`… for a manager, a name with `connection` / `conn` / `db` / `dbal` for a connection.
 
-**Scope.** Methods of classes, traits, interfaces and enums, and the closures inside them. Free functions and code outside classes are not analysed.
+**Scope.** The rollback, flush-in-transaction and recursion rules run per method (PHPStan's `InClassMethodNode`): methods of classes, interfaces, enums and anonymous classes (each analysed once, with its own `$this`), the closures inside them, and trait methods — analysed in the context of each class that uses the trait, so a trait used by two classes gets one finding per class, like PHPStan's own rules. The raw-flush rule is class-level: it does not see flushes in trait methods, and an anonymous class's flushes do not count for the class that defines it. Free functions and code outside classes are not analysed. First-class callables (`$em->flush(...)`) are not calls and are ignored.
+
+**Database.** The 1305 failure is specific to MySQL / MariaDB with DBAL 4 savepoints. On PostgreSQL `ROLLBACK TO SAVEPOINT` still works after a deadlock, and DBAL 3 without savepoints has none to lose; the rules still flag the pattern there, because the code usually has to run on MySQL too.
 
 ---
 
@@ -392,15 +394,15 @@ parameters:
 - `beginTransaction()` runs in the same function before the `try` (the TaskBoard `TaskApiTransaction` / AuthKit `InvitationAcceptor` pattern), or
 - the `try` block calls `beginTransaction()`, `wrapInTransaction()` / `transactional()` or an ORM `flush()` (directly or through a `flush($entityManager)` helper).
 
-A rollback guarded by `if ($connection->isTransactionActive())` is still reported (the message says why: after the failed savepoint rollback the transaction is still active, at the wrong level).
+A rollback guarded by `if ($connection->isTransactionActive())`, or by a nesting-level test that does not pin level 1 (`getTransactionNestingLevel() > 0`, `!== 2`, `> $entry`), is still reported (the message says why: after the failed savepoint rollback the transaction is still active, at the wrong level).
 
-**Not reported:** a rollback inside its own `try` whose `catch` / `finally` calls `close()`; a rollback after a `close()` call in the same handler; a rollback under an `if` / `elseif` that checks `getTransactionNestingLevel()`; rollbacks in closures defined inside the handler; PDO / other non-Doctrine receivers.
+**Not reported:** a rollback inside its own `try` whose `catch` / `finally` calls `close()` on the DBAL connection; a rollback after such a `close()` in the same handler; a rollback under an `if` / `elseif` that pins `getTransactionNestingLevel()` to 1 (`=== 1`, `== 1`, `<= 1`, `< 2`, either side); rollbacks in closures defined inside the handler; PDO / other non-Doctrine receivers. `EntityManager::close()` and `close()` on anything that is not a connection (a file, a stream) do not count: they do not reset the nesting level.
 
 **Known false positives:** a hand-written transaction that is never called inside another transaction and never flushes the ORM inside it (the rollback then runs at level 1 and is safe); the rule cannot see the call graph. **Known false negatives:** the begin in a caller or another method; a `close()` in a sibling branch earlier in the handler counts as recovery.
 
 **Why:** see [Worker load readiness](#worker-load-readiness-opt-in): one deadlock produces a 1305 instead of a retryable deadlock and leaves the worker's connection nested for every later request.
 
-**Fix:** run the work through `TransactionRunnerInterface::run()` (or the DoctrineDeadlockRetryBundle runner), or close the connection when the rollback fails:
+**Fix:** roll back to the level the transaction started at and close the connection only if that rollback throws — or run the work through `TransactionRunnerInterface::run()` (`nowo-tech/transaction-contract`, or the DoctrineDeadlockRetryBundle runner). Do not close on every failure (at entry level 0 that silently drops session locks, and inside a caller's transaction it ends that transaction), and do not skip the rollback when nested (the nesting counter then stays above the entry level):
 
 ```php
 } catch (\Throwable $e) {
@@ -425,7 +427,7 @@ A rollback guarded by `if ($connection->isTransactionActive())` is still reporte
 
 **Not reported:** classes whose name or interfaces contain `TransactionRunner` (the runner owns the transaction); callables that are not closures (`$this->work(...)`, `[$this, 'work']`); flushes in a caller's callable (UptimeMonitor `TenantQuota::withTenantLock()` takes `$write` from its callers: the flush is not visible there).
 
-**Known false positives:** a flush between two unrelated begin/commit pairs when the positions overlap (rare). **Known false negatives:** flushes in methods called from inside the transaction, and transactions opened in a caller.
+Each `beginTransaction()` is paired with the first `commit()` after it: a flush between one transaction's commit and the next begin is outside. **Known false negatives:** flushes in methods called from inside the transaction, transactions opened in a caller, and closures stored in a variable or passed through another method before they reach `wrapInTransaction()`.
 
 **Why:** `flush()` opens its own transaction; inside another one it runs at nesting level 2 on a savepoint. After a deadlock the ORM's own rollback fails with 1305, so the deadlock is never retried and the connection stays nested.
 
@@ -439,11 +441,13 @@ A rollback guarded by `if ($connection->isTransactionActive())` is still reporte
 
 **Detects:** a direct `$entityManager->flush()` in a class that never recovers a closed entity manager: no `isOpen()` on an entity manager, no `resetManager()`, no `flush($entityManager)` helper, no call whose name contains `recover`, `reopen`, `ensureOpen` or `resetIfClosed` with an entity-manager argument, and no call on a dependency whose short class name contains `Recover`, `Flusher`, `TransactionRunner` or `DeadlockRetry`. One finding per raw flush (ChatKit `ChatService` pattern).
 
-**Skipped:** anonymous classes; classes whose short name ends with `Test`, `TestCase`, `Fixture(s)`, `Migration` or `Command`, or whose namespace has a `Tests`, `Test`, `Fixtures`, `DataFixtures`, `Migrations` or `Command` segment.
+**Skipped:** anonymous classes; Symfony Console commands (subclasses of `Symfony\Component\Console\Command\Command`, or classes with `#[AsCommand]`); classes whose short name ends with `Test`, `TestCase`, `Fixture(s)` or `Migration`, or whose namespace has a `Tests`, `Test`, `Fixtures`, `DataFixtures` or `Migrations` segment. A DDD / CQRS `…\Application\Command\…Handler` is analysed: it runs in a Messenger worker.
+
+**Message:** a failed flush closes the manager, so every later write through it in the same request or message fails; in a worker without DoctrineBundle's resetter it stays closed for later requests too.
 
 **Opt-in only, not in `ruleset-worker-load.neon`:** the check is class-level, so it is noisy — a controller or service that flushes in every action gets one finding per flush, including apps where DoctrineBundle's `Registry::reset()` (run by `services_resetter`) may already replace a closed lazy manager between requests — though not within the request that closed it. It is useful for bundles that must not rely on the host resetting the manager, and to find the services that need a recovery helper. **Known false negatives:** a class with any recovery call is clean even if other methods flush raw.
 
-**Fix:** after a failed flush, `if (!$em->isOpen()) { $registry->resetManager(); }`, or flush through a recovering helper / `TransactionRunnerInterface`.
+**Fix:** after a failed flush, `if (!$em->isOpen()) { $registry->resetManager(); }`, or flush through a recovering helper / `TransactionRunnerInterface` (`nowo-tech/transaction-contract`).
 
 **Demo:** `demo/worker/bad/NoFlushWithoutClosedManagerRecovery.php` · good: `demo/worker/good/NoFlushWithoutClosedManagerRecoveryGood.php`
 

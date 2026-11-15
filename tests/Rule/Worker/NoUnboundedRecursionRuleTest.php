@@ -30,6 +30,8 @@ final class NoUnboundedRecursionRuleTest extends AbstractRuleTestCase
             [$message('Method descendantsOf()', 'childrenOf()'), 75],
             [$message('Method rootOf()', 'getParent()'), 119],
             [$message('Closure $walk in flatten()', 'getReplies()'), 144],
+            [$message('Method rootId()', 'getParent()'), 183],
+            [$message('Method size()', 'getChildren()'), 198],
         ]);
     }
 

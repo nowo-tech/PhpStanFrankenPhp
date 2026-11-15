@@ -16,7 +16,7 @@ use PhpParser\Node\Identifier;
 use PhpParser\Node\Stmt\Catch_;
 use PhpParser\Node\Stmt\Finally_;
 use PHPStan\Analyser\Scope;
-use PHPStan\Node\InClassNode;
+use PHPStan\Node\InClassMethodNode;
 use PHPStan\Reflection\ClassReflection;
 use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\Rule;
@@ -32,19 +32,21 @@ use PHPStan\Rules\RuleErrorBuilder;
  * requests.
  *
  * Heuristic: a `flush()` on an entity manager (or a `flush($entityManager)` helper) that comes
- * after a `beginTransaction()` in the same function and before a later `commit()` (or with no
- * `commit()` after it), outside catch / finally blocks; or any such flush in the body of a closure
+ * after a `beginTransaction()` in the same function and before the first `commit()` that follows
+ * that begin (or with no `commit()` after it), outside catch / finally blocks; or any such flush in the body of a closure
  * / arrow function passed directly to `wrapInTransaction()` / `transactional()`. Classes whose
  * name or interfaces contain `TransactionRunner` are skipped: the runner is where the
  * transaction belongs.
  *
+ * Runs per method (`InClassMethodNode`): trait methods are analysed in each using class.
+ *
  * Enable via `frankenphp.flagFlushInHandWrittenTransaction: true` or `ruleset-worker-load.neon`.
  *
- * @implements Rule<InClassNode>
+ * @implements Rule<InClassMethodNode>
  */
 final class NoFlushInHandWrittenTransactionRule implements Rule
 {
-    private const MESSAGE = 'EntityManager::flush() inside %s runs on a nested transaction (a savepoint): after a deadlock the savepoint is gone, the ORM\'s own rollback fails with 1305, the deadlock is never retried and the connection stays nested for the worker\'s next requests. Run the unit of work through TransactionRunnerInterface::run() (one flush at the outer level, connection repaired on failure), or move the flush out of the transaction%s.';
+    private const MESSAGE = 'EntityManager::flush() inside %s runs on a nested transaction (a savepoint): after a deadlock (MySQL/MariaDB, DBAL 4 savepoints) the savepoint is gone, the ORM\'s own rollback fails with 1305, the deadlock is never retried and the connection stays nested for the worker\'s next requests. Run the unit of work through TransactionRunnerInterface::run() (nowo-tech/transaction-contract; one flush at the outer level, connection repaired on failure), or move the flush out of the transaction%s.';
 
     public function __construct(
         private readonly bool $enabled = false,
@@ -53,7 +55,7 @@ final class NoFlushInHandWrittenTransactionRule implements Rule
 
     public function getNodeType(): string
     {
-        return InClassNode::class;
+        return InClassMethodNode::class;
     }
 
     public function processNode(Node $node, Scope $scope): array
@@ -64,25 +66,24 @@ final class NoFlushInHandWrittenTransactionRule implements Rule
 
         $errors = [];
         $reported = [];
-        foreach ($node->getOriginalNode()->getMethods() as $method) {
-            $resolver = DoctrineExprResolver::forFunction($scope, $node->getClassReflection(), $method);
-            foreach (AstFinder::findAll($method, static fn (Node $n): bool => $n instanceof FunctionLike, true) as $function) {
-                if ($function instanceof FunctionLike) {
-                    $this->checkBeginCommit($function->getStmts() ?? [], $resolver, $reported, $errors);
-                }
+        $method = $node->getOriginalNode();
+        $resolver = DoctrineExprResolver::forFunction($scope, $node->getClassReflection(), $method);
+        foreach (AstFinder::findAll($method, static fn (Node $n): bool => $n instanceof FunctionLike, true) as $function) {
+            if ($function instanceof FunctionLike) {
+                $this->checkBeginCommit($function->getStmts() ?? [], $resolver, $reported, $errors);
             }
-            $wrappers = AstFinder::findAll(
-                $method,
-                static fn (Node $n): bool => $resolver->isTransactionCall($n, ['wrapintransaction', 'transactional']),
-                true,
-            );
-            foreach ($wrappers as $wrapper) {
-                /** @var MethodCall $wrapper */
-                $callable = ($wrapper->args[0] ?? null) instanceof Arg ? $wrapper->args[0]->value : null;
-                if ($callable instanceof Closure || $callable instanceof ArrowFunction) {
-                    $name = $wrapper->name instanceof Identifier ? $wrapper->name->toString() : 'wrapInTransaction';
-                    $this->report($this->flushes($callable->getStmts(), $resolver), 'a '.$name.'() callable', DoctrineExprResolver::KIND_CONNECTION === $resolver->kindOf($wrapper->var) ? '' : ' (EntityManager::'.$name.'() already flushes after the callable)', $reported, $errors);
-                }
+        }
+        $wrappers = AstFinder::findAll(
+            $method,
+            static fn (Node $n): bool => $resolver->isTransactionCall($n, ['wrapintransaction', 'transactional']),
+            true,
+        );
+        foreach ($wrappers as $wrapper) {
+            /** @var MethodCall $wrapper */
+            $callable = ($wrapper->args[0] ?? null) instanceof Arg ? $wrapper->args[0]->value : null;
+            if ($callable instanceof Closure || $callable instanceof ArrowFunction) {
+                $name = $wrapper->name instanceof Identifier ? $wrapper->name->toString() : 'wrapInTransaction';
+                $this->report($this->flushes($callable->getStmts(), $resolver), 'a '.$name.'() callable', DoctrineExprResolver::KIND_CONNECTION === $resolver->kindOf($wrapper->var) ? '' : ' (EntityManager::'.$name.'() already flushes after the callable)', $reported, $errors);
             }
         }
 
@@ -118,9 +119,14 @@ final class NoFlushInHandWrittenTransactionRule implements Rule
      */
     private function beforeCommit(Node $flush, Node $begin, array $commits): bool
     {
-        $after = array_filter($commits, static fn (Node $c): bool => $c->getStartFilePos() > $begin->getEndFilePos());
+        // The begin's own commit is the first one after it; a flush after that commit is outside.
+        foreach ($commits as $commit) {
+            if ($commit->getStartFilePos() > $begin->getEndFilePos()) {
+                return $commit->getStartFilePos() > $flush->getEndFilePos();
+            }
+        }
 
-        return [] === $after || [] !== array_filter($after, static fn (Node $c): bool => $c->getStartFilePos() > $flush->getEndFilePos());
+        return true;
     }
 
     /**

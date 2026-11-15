@@ -7,13 +7,18 @@ namespace NowoTech\PhpStanFrankenPhp\Rule\Worker;
 use NowoTech\PhpStanFrankenPhp\Support\AstFinder;
 use NowoTech\PhpStanFrankenPhp\Support\DoctrineExprResolver;
 use PhpParser\Node;
+use PhpParser\Node\Expr;
+use PhpParser\Node\Expr\BinaryOp;
+use PhpParser\Node\Expr\MethodCall;
+use PhpParser\Node\Expr\NullsafeMethodCall;
 use PhpParser\Node\FunctionLike;
+use PhpParser\Node\Scalar\Int_;
 use PhpParser\Node\Stmt\ElseIf_;
 use PhpParser\Node\Stmt\Finally_;
 use PhpParser\Node\Stmt\If_;
 use PhpParser\Node\Stmt\TryCatch;
 use PHPStan\Analyser\Scope;
-use PHPStan\Node\InClassNode;
+use PHPStan\Node\InClassMethodNode;
 use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
@@ -33,20 +38,24 @@ use PHPStan\Rules\RuleErrorBuilder;
  * - the `try` block calls `beginTransaction()`, `wrapInTransaction()` / `transactional()` or an
  *   ORM `flush()` (the ORM opens its own, nested, transaction).
  *
- * Not reported: a rollback inside its own `try` whose catch / finally calls `close()`, a
- * rollback after a `close()` in the same handler, and a rollback under an `if` that checks
- * `getTransactionNestingLevel()`. A rollback under `isTransactionActive()` is still reported:
- * the transaction is still active at the nesting level the failed rollback left behind.
+ * Not reported: a rollback inside its own `try` whose catch / finally calls `close()` on the
+ * connection, a rollback after such a `close()` in the same handler, and a rollback under an
+ * `if` that pins `getTransactionNestingLevel()` to 1 (`=== 1`, `== 1`, `<= 1`, `< 2`). A rollback
+ * under `isTransactionActive()` or another nesting-level test (`> 0`) is still reported: the
+ * transaction is still active at the nesting level the failed rollback left behind.
+ *
+ * Runs per method (`InClassMethodNode`), so trait methods are analysed in each using class and
+ * anonymous classes are analysed once, with their own `$this`.
  *
  * Enable via `frankenphp.flagRollbackAfterNestedBegin: true` or `ruleset-worker-load.neon`.
  *
- * @implements Rule<InClassNode>
+ * @implements Rule<InClassMethodNode>
  */
 final class NoRollbackAfterNestedBeginRule implements Rule
 {
-    private const MESSAGE = '%s() in a catch/finally after %s can run on a nested transaction: after a deadlock MySQL drops every savepoint, the rollback fails with 1305 and the connection stays nested for every later request of the worker.%s Close the connection on failure (or roll back only at nesting level 1), or run the work through a TransactionRunnerInterface.';
+    private const MESSAGE = '%s() in a catch/finally after %s can run on a nested transaction: after a deadlock (MySQL/MariaDB, DBAL 4 savepoints) the server drops every savepoint, the rollback fails with 1305 and the connection stays nested for every later request of the worker.%s Roll back to the level the transaction started at and close the connection only if that rollback throws (try { $connection->rollBack(); } catch (\Throwable) { $connection->close(); }), or run the work through TransactionRunnerInterface::run() (nowo-tech/transaction-contract).';
 
-    private const GUARD_NOTE = ' The isTransactionActive() guard does not help: the transaction is still active at the level the failed rollback leaves.';
+    private const GUARD_NOTE = ' The %s guard does not help: the transaction is still active at the level the failed rollback leaves.';
 
     public function __construct(
         private readonly bool $enabled = false,
@@ -55,7 +64,7 @@ final class NoRollbackAfterNestedBeginRule implements Rule
 
     public function getNodeType(): string
     {
-        return InClassNode::class;
+        return InClassMethodNode::class;
     }
 
     public function processNode(Node $node, Scope $scope): array
@@ -66,12 +75,11 @@ final class NoRollbackAfterNestedBeginRule implements Rule
 
         $errors = [];
         $reported = [];
-        foreach ($node->getOriginalNode()->getMethods() as $method) {
-            $resolver = DoctrineExprResolver::forFunction($scope, $node->getClassReflection(), $method);
-            foreach (AstFinder::findAll($method, static fn (Node $n): bool => $n instanceof FunctionLike, true) as $function) {
-                if ($function instanceof FunctionLike) {
-                    $this->processFunction($function->getStmts() ?? [], $resolver, $reported, $errors);
-                }
+        $method = $node->getOriginalNode();
+        $resolver = DoctrineExprResolver::forFunction($scope, $node->getClassReflection(), $method);
+        foreach (AstFinder::findAll($method, static fn (Node $n): bool => $n instanceof FunctionLike, true) as $function) {
+            if ($function instanceof FunctionLike) {
+                $this->processFunction($function->getStmts() ?? [], $resolver, $reported, $errors);
             }
         }
 
@@ -100,8 +108,8 @@ final class NoRollbackAfterNestedBeginRule implements Rule
                 $handlers[] = $try->finally->stmts;
             }
             foreach ($handlers as $stmts) {
-                $closes = AstFinder::calls($stmts, ['close']);
-                $this->walk($stmts, false, false, $closes, $reason, $resolver, $reported, $errors);
+                $closes = $this->connectionCloses($stmts, $resolver);
+                $this->walk($stmts, false, null, $closes, $reason, $resolver, $reported, $errors);
             }
         }
     }
@@ -132,11 +140,11 @@ final class NoRollbackAfterNestedBeginRule implements Rule
      * @param array<int, true>          $reported
      * @param list<IdentifierRuleError> $errors
      */
-    private function walk(array $nodes, bool $safe, bool $guarded, array $closes, string $reason, DoctrineExprResolver $resolver, array &$reported, array &$errors): void
+    private function walk(array $nodes, bool $safe, ?string $guard, array $closes, string $reason, DoctrineExprResolver $resolver, array &$reported, array &$errors): void
     {
         foreach ($nodes as $node) {
             if (\is_array($node)) {
-                $this->walk($node, $safe, $guarded, $closes, $reason, $resolver, $reported, $errors);
+                $this->walk($node, $safe, $guard, $closes, $reason, $resolver, $reported, $errors);
                 continue;
             }
             if (!$node instanceof Node || $node instanceof FunctionLike || $node instanceof Node\Stmt\ClassLike) {
@@ -150,21 +158,19 @@ final class NoRollbackAfterNestedBeginRule implements Rule
                 if ($node->finally instanceof Finally_) {
                     $closing[] = $node->finally->stmts;
                 }
-                $this->walk($node->stmts, $safe || [] !== AstFinder::calls($closing, ['close']), $guarded, $closes, $reason, $resolver, $reported, $errors);
-                $this->walk($closing, $safe, $guarded, $closes, $reason, $resolver, $reported, $errors);
+                $this->walk($node->stmts, $safe || [] !== $this->connectionCloses($closing, $resolver), $guard, $closes, $reason, $resolver, $reported, $errors);
+                $this->walk($closing, $safe, $guard, $closes, $reason, $resolver, $reported, $errors);
                 continue;
             }
             if ($node instanceof If_ || $node instanceof ElseIf_) {
-                $nesting = [] !== AstFinder::calls($node->cond, ['gettransactionnestinglevel']);
-                $active = [] !== AstFinder::calls($node->cond, ['istransactionactive']);
-                $this->walk($node instanceof If_ ? [$node->stmts, $node->elseifs, $node->else] : $node->stmts, $safe || $nesting, $guarded || $active, $closes, $reason, $resolver, $reported, $errors);
+                $this->walk($node instanceof If_ ? [$node->stmts, $node->elseifs, $node->else] : $node->stmts, $safe || $this->pinsLevelOne($node->cond), $guard ?? $this->guardOf($node->cond), $closes, $reason, $resolver, $reported, $errors);
                 continue;
             }
             if ($resolver->isTransactionCall($node, ['rollback'])
                 && !$safe && !$this->closedBefore($node, $closes) && !isset($reported[spl_object_id($node)])
             ) {
                 $reported[spl_object_id($node)] = true;
-                $errors[] = RuleErrorBuilder::message(\sprintf(self::MESSAGE, AstFinder::terminalName($node), $reason, $guarded ? self::GUARD_NOTE : ''))
+                $errors[] = RuleErrorBuilder::message(\sprintf(self::MESSAGE, AstFinder::terminalName($node), $reason, null === $guard ? '' : \sprintf(self::GUARD_NOTE, $guard)))
                     ->identifier('frankenphp.worker.noRollbackAfterNestedBegin')
                     ->line($node->getStartLine())
                     ->build();
@@ -173,7 +179,7 @@ final class NoRollbackAfterNestedBeginRule implements Rule
             foreach ($node->getSubNodeNames() as $name) {
                 $children[] = $node->{$name};
             }
-            $this->walk($children, $safe, $guarded, $closes, $reason, $resolver, $reported, $errors);
+            $this->walk($children, $safe, $guard, $closes, $reason, $resolver, $reported, $errors);
         }
     }
 
@@ -189,5 +195,61 @@ final class NoRollbackAfterNestedBeginRule implements Rule
         }
 
         return false;
+    }
+
+    /**
+     * `close()` calls on a DBAL connection (EntityManager::close() or a file handle does not reset the nesting level).
+     *
+     * @param array<mixed> $nodes
+     *
+     * @return list<Node>
+     */
+    private function connectionCloses(array $nodes, DoctrineExprResolver $resolver): array
+    {
+        return array_values(array_filter(
+            AstFinder::calls($nodes, ['close']),
+            static fn (Node $call): bool => ($call instanceof MethodCall || $call instanceof NullsafeMethodCall) && $resolver->isConnection($call->var),
+        ));
+    }
+
+    /**
+     * Whether the condition compares getTransactionNestingLevel() so that only level 1 passes.
+     */
+    private function pinsLevelOne(Expr $cond): bool
+    {
+        foreach (AstFinder::findAll($cond, static fn (Node $n): bool => $n instanceof BinaryOp) as $op) {
+            /** @var BinaryOp $op */
+            $levelLeft = 'gettransactionnestinglevel' === AstFinder::callName($op->left);
+            $levelRight = 'gettransactionnestinglevel' === AstFinder::callName($op->right);
+            $number = $levelLeft ? $op->right : ($levelRight ? $op->left : null);
+            if (!$number instanceof Int_) {
+                continue;
+            }
+            $pinned = match (true) {
+                $op instanceof BinaryOp\Identical, $op instanceof BinaryOp\Equal => 1 === $number->value,
+                $op instanceof BinaryOp\SmallerOrEqual => $levelLeft && 1 === $number->value,
+                $op instanceof BinaryOp\Smaller => $levelLeft && 2 === $number->value,
+                $op instanceof BinaryOp\GreaterOrEqual => $levelRight && 1 === $number->value,
+                $op instanceof BinaryOp\Greater => $levelRight && 2 === $number->value,
+                default => false,
+            };
+            if ($pinned) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * The transaction-state test an `if` relies on, when it does not pin level 1.
+     */
+    private function guardOf(Expr $cond): ?string
+    {
+        if ([] !== AstFinder::calls($cond, ['istransactionactive'])) {
+            return 'isTransactionActive()';
+        }
+
+        return [] !== AstFinder::calls($cond, ['gettransactionnestinglevel']) ? 'getTransactionNestingLevel()' : null;
     }
 }

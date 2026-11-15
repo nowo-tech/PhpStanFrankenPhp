@@ -22,7 +22,7 @@ final class NoFlushInHandWrittenTransactionRuleTest extends AbstractRuleTestCase
 
     public function testRule(): void
     {
-        $message = static fn (string $where, string $hint = ''): string => 'EntityManager::flush() inside '.$where.' runs on a nested transaction (a savepoint): after a deadlock the savepoint is gone, the ORM\'s own rollback fails with 1305, the deadlock is never retried and the connection stays nested for the worker\'s next requests. Run the unit of work through TransactionRunnerInterface::run() (one flush at the outer level, connection repaired on failure), or move the flush out of the transaction'.$hint.'.';
+        $message = static fn (string $where, string $hint = ''): string => 'EntityManager::flush() inside '.$where.' runs on a nested transaction (a savepoint): after a deadlock (MySQL/MariaDB, DBAL 4 savepoints) the savepoint is gone, the ORM\'s own rollback fails with 1305, the deadlock is never retried and the connection stays nested for the worker\'s next requests. Run the unit of work through TransactionRunnerInterface::run() (nowo-tech/transaction-contract; one flush at the outer level, connection repaired on failure), or move the flush out of the transaction'.$hint.'.';
 
         $this->analyse([__DIR__.'/../../Fixtures/Worker/NoFlushInHandWrittenTransaction.php'], [
             [$message('a wrapInTransaction() callable', ' (EntityManager::wrapInTransaction() already flushes after the callable)'), 52],
@@ -30,6 +30,10 @@ final class NoFlushInHandWrittenTransactionRuleTest extends AbstractRuleTestCase
             [$message('a beginTransaction()…commit() block'), 89],
             [$message('a transactional() callable'), 101],
             [$message('a beginTransaction()…commit() block'), 116],
+            [$message('a beginTransaction()…commit() block'), 169],
+            [$message('a beginTransaction()…commit() block'), 173],
+            [$message('a beginTransaction()…commit() block'), 197],
+            [$message('a beginTransaction()…commit() block'), 209],
         ]);
     }
 

@@ -28,8 +28,8 @@ help:
 	@echo "Dependencies: install, update, validate"
 	@echo "Tests: test, test-coverage, coverage-check, test-coverage-100"
 	@echo "Quality: cs-check, cs-fix, rector, rector-dry, phpstan, qa"
-	@echo "Demos: demo-classic, demo-worker, demo-hardening, demo-all"
-	@echo "Demo (clean): demo-classic-good, demo-worker-good, demo-hardening-good"
+	@echo "Demos: demo-classic, demo-worker, demo-hardening, demo-all, demo-worker-no-kernel-reset, demo-worker-load"
+	@echo "Demo (clean): demo-classic-good, demo-worker-good, demo-hardening-good, demo-worker-no-kernel-reset-good, demo-worker-load-good"
 	@echo "Release: release-check, release-check-demos, demo-smoke, check-open-prs, composer-sync"
 	@echo "Other: setup-hooks, ensure-up, clean"
 
@@ -117,7 +117,6 @@ demo-worker-no-kernel-reset: ensure-up
 
 demo-worker-no-kernel-reset-good: ensure-up
 	@$(COMPOSE) exec -T $(SERVICE_PHP) composer demo-worker-no-kernel-reset-good
-	@$(COMPOSE) exec -T $(SERVICE_PHP) composer demo-worker-load-good
 
 demo-worker-load: ensure-up
 	@echo "=== Worker load-readiness demos (expect findings) ==="

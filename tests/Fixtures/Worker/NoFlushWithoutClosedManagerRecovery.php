@@ -7,6 +7,10 @@ namespace DemoWorker\Db\Recovery;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 final class RecoveringFlusher
 {
@@ -169,16 +173,48 @@ final class RegistryManager
     }
 }
 
-final class ImportCommand
+final class ImportCommand extends Command
+{
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+    ) {
+        parent::__construct('app:import');
+    }
+
+    public function run(InputInterface $input, OutputInterface $output): int
+    {
+        $this->entityManager->flush(); // fine: Symfony Console commands are skipped
+
+        return 0;
+    }
+}
+
+#[AsCommand(name: 'app:purge')]
+final class PurgeInvokable
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
     ) {
     }
 
-    public function run(): void
+    public function __invoke(): int
     {
-        $this->entityManager->flush(); // fine: console commands are skipped
+        $this->entityManager->flush(); // fine: #[AsCommand] invokable command
+
+        return 0;
+    }
+}
+
+final class ReturnsFlushCallable
+{
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+    ) {
+    }
+
+    public function later(): \Closure
+    {
+        return $this->entityManager->flush(...); // fine: a first-class callable is not a flush
     }
 }
 
@@ -193,5 +229,35 @@ final class ConsumesFlushedObject
         };
         $anonymous->flush(); // fine: not an entity manager
         $other->flush(); // fine: untyped object with a neutral name
+        $flusher = new class($this->manager()) {
+            public function __construct(
+                private EntityManagerInterface $entityManager,
+            ) {
+            }
+
+            public function go(): void
+            {
+                $this->entityManager->flush(); // fine: anonymous classes are skipped, and not counted for the outer class
+            }
+        };
+        $flusher->go();
+    }
+
+    private function manager(): EntityManagerInterface
+    {
+        throw new \LogicException();
+    }
+}
+
+final class UserFixture
+{
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+    ) {
+    }
+
+    public function load(): void
+    {
+        $this->entityManager->flush(); // fine: fixtures are skipped
     }
 }

@@ -22,22 +22,24 @@ final class NoFlushWithoutClosedManagerRecoveryRuleTest extends AbstractRuleTest
 
     public function testRule(): void
     {
-        $message = static fn (string $class): string => 'Class DemoWorker\\Db\\Recovery\\'.$class.' calls EntityManager::flush() but never recovers a closed entity manager (no isOpen() check, no ManagerRegistry::resetManager(), no recovering helper). A failed flush closes the manager and, in a long-lived worker, every later write through it fails until the process restarts. Check isOpen() and reset the manager through the registry after a failure, or flush through a recovering helper / TransactionRunnerInterface.';
+        $message = static fn (string $class, string $namespace = 'DemoWorker\\Db\\Recovery\\'): string => 'Class '.$namespace.$class.' calls EntityManager::flush() but never recovers a closed entity manager (no isOpen() check, no ManagerRegistry::resetManager(), no recovering helper). A failed flush closes the manager: every later write through it in the same request or message fails, and in a worker without DoctrineBundle\'s resetter it stays closed for later requests too. Check isOpen() and reset the manager through the registry after a failure, or flush through a recovering helper / TransactionRunnerInterface (nowo-tech/transaction-contract).';
 
         $this->analyse([
             __DIR__.'/../../Fixtures/Worker/NoFlushWithoutClosedManagerRecovery.php',
             __DIR__.'/../../Fixtures/Worker/NoFlushWithoutClosedManagerRecoveryFixturesNs.php',
+            __DIR__.'/../../Fixtures/Worker/NoFlushWithoutClosedManagerRecoveryCqrs.php',
         ], [
-            [$message('ChatService'), 78],
-            [$message('ChatService'), 83],
-            [$message('ChatService'), 88],
-            [$message('RegistryManager'), 167],
+            [$message('ChatService'), 82],
+            [$message('ChatService'), 87],
+            [$message('ChatService'), 92],
+            [$message('RegistryManager'), 171],
+            [$message('CreateTaskHandler', 'DemoWorker\\Application\\Command\\'), 20],
         ]);
     }
 
     public function testResolverCases(): void
     {
-        $message = 'Class DemoWorker\\Db\\Resolver\\ResolverCases calls EntityManager::flush() but never recovers a closed entity manager (no isOpen() check, no ManagerRegistry::resetManager(), no recovering helper). A failed flush closes the manager and, in a long-lived worker, every later write through it fails until the process restarts. Check isOpen() and reset the manager through the registry after a failure, or flush through a recovering helper / TransactionRunnerInterface.';
+        $message = 'Class DemoWorker\\Db\\Resolver\\ResolverCases calls EntityManager::flush() but never recovers a closed entity manager (no isOpen() check, no ManagerRegistry::resetManager(), no recovering helper). A failed flush closes the manager: every later write through it in the same request or message fails, and in a worker without DoctrineBundle\'s resetter it stays closed for later requests too. Check isOpen() and reset the manager through the registry after a failure, or flush through a recovering helper / TransactionRunnerInterface (nowo-tech/transaction-contract).';
 
         $this->analyse([__DIR__.'/../../Fixtures/Worker/DoctrineExprResolverCases.php'], [
             [$message, 33],
@@ -56,6 +58,7 @@ final class NoFlushWithoutClosedManagerRecoveryRuleTest extends AbstractRuleTest
         $this->analyse([
             __DIR__.'/../../Fixtures/Worker/NoFlushWithoutClosedManagerRecovery.php',
             __DIR__.'/../../Fixtures/Worker/NoFlushWithoutClosedManagerRecoveryFixturesNs.php',
+            __DIR__.'/../../Fixtures/Worker/NoFlushWithoutClosedManagerRecoveryCqrs.php',
         ], []);
     }
 }

@@ -153,3 +153,65 @@ final class DoctrineTransactionRunner implements TransactionRunnerInterface
         return $result;
     }
 }
+
+// Audit QB: sequential transactions, first-class callables, traits, anonymous classes.
+final class AuditQbFlushCases
+{
+    public function __construct(
+        private Connection $conn,
+        private EntityManagerInterface $em,
+    ) {
+    }
+
+    public function sequential(): void
+    {
+        $this->conn->beginTransaction();
+        $this->em->flush(); // error: inside the first transaction
+        $this->conn->commit();
+        $this->em->flush(); // fine: between the two transactions
+        $this->conn->beginTransaction();
+        $this->em->flush(); // error: inside the second transaction
+        $this->conn->commit();
+    }
+
+    public function firstClassCallable(): \Closure
+    {
+        $this->conn->beginTransaction();
+        $flush = $this->em->flush(...); // fine: not a call
+        $this->conn->commit();
+
+        return $flush;
+    }
+
+    public function anonymous(): object
+    {
+        return new class($this->em) {
+            public function __construct(
+                private EntityManagerInterface $em,
+            ) {
+            }
+
+            public function go(): void
+            {
+                $this->em->getConnection()->beginTransaction();
+                $this->em->flush(); // error (reported once)
+                $this->em->getConnection()->commit();
+            }
+        };
+    }
+}
+
+trait FlushesInTransactionTrait
+{
+    public function save(EntityManagerInterface $em): void
+    {
+        $em->getConnection()->beginTransaction();
+        $em->flush(); // error: trait methods are analysed
+        $em->getConnection()->commit();
+    }
+}
+
+final class UsesFlushesInTransactionTrait
+{
+    use FlushesInTransactionTrait;
+}
