@@ -8,4 +8,5 @@ return [
     Nowo\HotReloadBundle\NowoHotReloadBundle::class => ['dev' => true, 'test' => true],
     Nowo\TwigInspectorBundle\NowoTwigInspectorBundle::class => ['dev' => true, 'test' => true],
     Twig\Extra\TwigExtraBundle\TwigExtraBundle::class => ['all' => true],
+    Nowo\UiKitBundle\NowoUiKitBundle::class => ['all' => true],
 ];
