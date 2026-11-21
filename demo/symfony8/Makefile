@@ -17,6 +17,7 @@ help:
 	@echo "  make phpstan-hardening  Analyse all levels"
 	@echo "  make test               PHPUnit"
 	@echo "  make verify             HTTP 200 smoke"
+	@echo "  make test-e2e           Playwright rules + axe against the running demo"
 	@echo "  make update-bundle      Refresh path-repo package(s) + clear cache"
 
 up:
@@ -86,3 +87,19 @@ verify:
 BUNDLE_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/../..)
 # Optional: monorepo helper absent on standalone GitHub Actions checkout (REQ-MAKE-009).
 -include $(BUNDLE_ROOT)/../.scripts/Makefile.demo-update-deps.mk
+
+# REQ-DEMO-013: Playwright in the official image (no Node on the host); the demo must be up (make up).
+# The image tag follows the exact @playwright/test version pinned in e2e/package.json (browsers ship with the image).
+PLAYWRIGHT_VERSION := $(shell sed -n 's/.*"@playwright\/test": "\([0-9.]*\)".*/\1/p' e2e/package.json)
+PLAYWRIGHT_IMAGE ?= mcr.microsoft.com/playwright:v$(PLAYWRIGHT_VERSION)-jammy
+
+.PHONY: test-e2e
+test-e2e: verify
+	@mkdir -p e2e/node_modules
+	@PORT=$$(grep -E '^PORT=' .env 2>/dev/null | cut -d= -f2 | tr -d '\r'); PORT=$${PORT:-8090}; \
+	docker run --rm --network host \
+		-v "$(CURDIR)/e2e:/e2e" -w /e2e \
+		-e CI="$${CI:-}" \
+		-e DEMO_BASE_URL=http://127.0.0.1:$$PORT \
+		$(PLAYWRIGHT_IMAGE) \
+		bash -lc 'npm ci --no-fund --no-audit && npx playwright test --project=chromium'

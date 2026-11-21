@@ -27,6 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Demo: runs in UiKit's demo platform shell (`nowo-tech/ui-kit-bundle` ^2.60); the demo's own header is gone and the pages use the shell page headers and section cards. The demo gains UiKit (`nowo-tech/ui-kit-bundle` ^2.60) and a Playwright suite (`make test-e2e`: layout rules, axe, worker-safe request counter); the hand-written jsDelivr hot-reload script is removed (HotReloadBundle injects the client). Demo only, no bundle change.
+
 ## [1.4.0] - 2026-11-15
 
 ### Added
