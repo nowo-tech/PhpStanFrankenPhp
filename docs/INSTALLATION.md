@@ -8,7 +8,7 @@
 
 ## Requirements
 
-- PHP `>= 8.1 < 8.6`
+- PHP `>= 8.1 < 8.7`
 - PHPStan `^2.0`
 
 ## Install
